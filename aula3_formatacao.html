@@ -1,0 +1,1181 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prisma Arena - Aula 3: Formatação de Células</title>
+    <style>
+        :root {
+            --primary-color: #2e0259;
+            --secondary-color: #5727a3;
+            --accent-color: #9152e0;
+            --highlight-color: #bf7af0;
+            --star-color: #f5c6ff;
+            --text-color: #ffffff;
+            --dark-bg: #0a0118;
+            --cell-border: #5727a3;
+            --grid-bg: rgba(15, 3, 40, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(145, 82, 224, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 70% 60%, rgba(191, 122, 240, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 40% 80%, rgba(245, 198, 255, 0.08) 0%, transparent 20%);
+            overflow-x: hidden;
+        }
+
+        header {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(145, 82, 224, 0.5);
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--star-color), var(--highlight-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(245, 198, 255, 0.3);
+            display: flex;
+            align-items: center;
+        }
+
+        .logo::before {
+            content: "✧";
+            margin-right: 0.5rem;
+            font-size: 1.8rem;
+            -webkit-text-fill-color: var(--star-color);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--highlight-color);
+            transition: width 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--highlight-color);
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4rem 1rem;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, var(--accent-color), var(--highlight-color), var(--star-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            max-width: 700px;
+            margin-bottom: 2.5rem;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #d8c3e9;
+        }
+
+        .cta-button {
+            background: linear-gradient(45deg, var(--accent-color), var(--highlight-color));
+            color: var(--text-color);
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(145, 82, 224, 0.5);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(145, 82, 224, 0.7);
+        }
+
+        .content-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 1rem;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 2.5rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: "";
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(to right, var(--accent-color), var(--highlight-color));
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .feature-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(145, 82, 224, 0.1), rgba(191, 122, 240, 0.1));
+            z-index: -1;
+            transform: translateY(100%);
+            transition: transform 0.5s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(145, 82, 224, 0.3);
+        }
+
+        .feature-card:hover::before {
+            transform: translateY(0);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--highlight-color);
+        }
+
+        .feature-card h3 {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            color: var(--highlight-color);
+        }
+
+        .feature-card p {
+            color: #d8c3e9;
+            line-height: 1.5;
+        }
+
+        .demo-section {
+            background: var(--grid-bg);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 4rem auto;
+            max-width: 1000px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--secondary-color);
+        }
+
+        .format-tools {
+            background-color: rgba(46, 2, 89, 0.5);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            border: 1px solid var(--accent-color);
+        }
+
+        .format-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            align-items: center;
+        }
+
+        .format-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .format-label {
+            font-size: 0.9rem;
+            color: var(--star-color);
+        }
+
+        .format-select, .format-input {
+            background-color: rgba(10, 1, 24, 0.7);
+            border: 1px solid var(--secondary-color);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            min-width: 120px;
+        }
+
+        .format-input {
+            width: 80px;
+        }
+
+        .format-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .format-button {
+            background-color: var(--secondary-color);
+            border: none;
+            color: white;
+            width: 36px;
+            height: 36px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .format-button:hover {
+            background-color: var(--accent-color);
+        }
+
+        .format-color {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .color-swatch {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.2s;
+        }
+
+        .color-swatch:hover {
+            transform: scale(1.1);
+        }
+
+        .spreadsheet-demo {
+            overflow-x: auto;
+            margin-top: 2rem;
+            background-color: rgba(10, 1, 24, 0.7);
+            border-radius: 8px;
+            border: 1px solid var(--secondary-color);
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 800px;
+        }
+
+        th, td {
+            border: 1px solid var(--cell-border);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: rgba(87, 39, 163, 0.1);
+        }
+
+        tr:hover {
+            background-color: rgba(145, 82, 224, 0.2);
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .control-button {
+            background: var(--primary-color);
+            color: var(--text-color);
+            border: 1px solid var(--accent-color);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .selected-cell {
+            background-color: rgba(191, 122, 240, 0.3) !important;
+        }
+
+        .tutorial-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .step-card {
+            background: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 10px;
+            padding: 2rem;
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .step-content h3 {
+            margin-bottom: 1rem;
+            color: var(--highlight-color);
+        }
+
+        .step-content p {
+            color: #d8c3e9;
+            line-height: 1.6;
+        }
+
+        .keyboard-shortcut {
+            display: inline-block;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            margin: 0 0.2rem;
+        }
+
+        .format-samples {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .format-example {
+            background-color: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 6px;
+            padding: 1rem;
+            text-align: center;
+        }
+
+        .example-label {
+            font-size: 0.8rem;
+            color: var(--star-color);
+            margin-bottom: 0.5rem;
+        }
+
+        footer {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 3rem 1rem;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--star-color), var(--highlight-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+
+        .footer-nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .footer-nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-nav a:hover {
+            color: var(--highlight-color);
+        }
+
+        .copyright {
+            margin-top: 2rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        /* Efeito de partículas estelares */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background-color: var(--star-color);
+            border-radius: 50%;
+            animation: twinkle 5s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 0.2;
+                transform: scale(0.8);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+        }
+
+        .nav-button {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-button:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul {
+                gap: 1rem;
+                margin-top: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .step-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .controls {
+                justify-content: center;
+            }
+
+            .format-row {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Efeito de estrelas -->
+    <div class="stars" id="stars"></div>
+
+    <header>
+        <div class="nav-container">
+            <div class="logo">Prisma Arena - Aula 3</div>
+            <nav>
+                <ul>
+                    <li><a href="#inicio">Início</a></li>
+                    <li><a href="#recursos">Recursos</a></li>
+                    <li><a href="#demo">Demonstração</a></li>
+                    <li><a href="#tutorial">Tutorial</a></li>
+                    <li><a href="index.html">Voltar ao Menu</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero" id="inicio">
+        <h1>Formatação de Células na Era Estelar</h1>
+        <p>Nesta aula, você aprenderá como transformar dados brutos em informações visualmente atraentes e profissionais. Domine a formatação de texto, números, datas e alinhamento, e descubra como utilizar estilos e temas para criar planilhas impressionantes.</p>
+        <button class="cta-button">Começar a Explorar</button>
+    </section>
+
+    <section class="content-section" id="recursos">
+        <h2 class="section-title">Recursos Estelares</h2>
+        <div class="grid-container">
+            <div class="feature-card">
+                <div class="feature-icon">Aa</div>
+                <h3>Formatação de Texto</h3>
+                <p>Transforme seu texto com opções de fonte, tamanho, estilo, cor e efeitos, criando documentos visualmente impactantes e com hierarquia visual clara.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">#</div>
+                <h3>Formatação Numérica</h3>
+                <p>Aprenda a apresentar valores numéricos de forma profissional com formatos específicos para moeda, percentual, frações, notação científica e muito mais.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📅</div>
+                <h3>Formatação de Datas</h3>
+                <p>Domine as diferentes formas de exibir datas e horas, permitindo uma visualização clara e adaptada às necessidades específicas dos seus dados temporais.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">↔️</div>
+                <h3>Alinhamento e Orientação</h3>
+                <p>Explore opções avançadas de alinhamento horizontal, vertical e de orientação do texto para criar planilhas organizadas e de fácil leitura.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎨</div>
+                <h3>Bordas e Preenchimento</h3>
+                <p>Aprenda a adicionar bordas personalizadas e cores de preenchimento que destacam informações importantes e melhoram a leitura dos seus dados.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🖌️</div>
+                <h3>Estilos e Temas</h3>
+                <p>Descubra como aplicar estilos predefinidos e temas completos que transformam instantaneamente a aparência da sua planilha com designs profissionais.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="demo-section" id="demo">
+        <h2 class="section-title">Demonstração Interativa</h2>
+        <p>Experimente diferentes opções de formatação nesta demonstração interativa. Selecione uma célula da tabela e use as ferramentas abaixo para aplicar formatações.</p>
+        
+        <div class="format-tools">
+            <div class="format-row">
+                <div class="format-group">
+                    <div class="format-label">Fonte</div>
+                    <select class="format-select" id="font-select">
+                        <option value="Arial">Arial</option>
+                        <option value="Calibri">Calibri</option>
+                        <option value="Times New Roman">Times New Roman</option>
+                        <option value="Verdana">Verdana</option>
+                        <option value="Segoe UI">Segoe UI</option>
+                    </select>
+                </div>
+                
+                <div class="format-group">
+                    <div class="format-label">Tamanho</div>
+                    <select class="format-select" id="size-select">
+                        <option value="10">10</option>
+                        <option value="11" selected>11</option>
+                        <option value="12">12</option>
+                        <option value="14">14</option>
+                        <option value="16">16</option>
+                        <option value="18">18</option>
+                    </select>
+                </div>
+                
+                <div class="format-group">
+                    <div class="format-label">Estilo</div>
+                    <div class="format-buttons">
+                        <button class="format-button" id="bold-btn" title="Negrito">B</button>
+                        <button class="format-button" id="italic-btn" title="Itálico">I</button>
+                        <button class="format-button" id="underline-btn" title="Sublinhado">U</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="format-row">
+                <div class="format-group">
+                    <div class="format-label">Cor do Texto</div>
+                    <div class="format-color">
+                        <div class="color-swatch" style="background-color: white;" data-color="white"></div>
+                        <div class="color-swatch" style="background-color: #F5C6FF;" data-color="#F5C6FF"></div>
+                        <div class="color-swatch" style="background-color: #BF7AF0;" data-color="#BF7AF0"></div>
+                        <div class="color-swatch" style="background-color: #9152E0;" data-color="#9152E0"></div>
+                        <div class="color-swatch" style="background-color: #5727A3;" data-color="#5727A3"></div>
+                    </div>
+                </div>
+                
+                <div class="format-group">
+                    <div class="format-label">Preenchimento</div>
+                    <div class="format-color">
+                        <div class="color-swatch" style="background-color: transparent;" data-fill="transparent"></div>
+                        <div class="color-swatch" style="background-color: rgba(245, 198, 255, 0.2);" data-fill="rgba(245, 198, 255, 0.2)"></div>
+                        <div class="color-swatch" style="background-color: rgba(191, 122, 240, 0.2);" data-fill="rgba(191, 122, 240, 0.2)"></div>
+                        <div class="color-swatch" style="background-color: rgba(145, 82, 224, 0.2);" data-fill="rgba(145, 82, 224, 0.2)"></div>
+                        <div class="color-swatch" style="background-color: rgba(87, 39, 163, 0.2);" data-fill="rgba(87, 39, 163, 0.2)"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="format-row">
+                <div class="format-group">
+                    <div class="format-label">Alinhamento</div>
+                    <div class="format-buttons">
+                        <button class="format-button" id="align-left" title="Alinhar à Esquerda">◀</button>
+                        <button class="format-button" id="align-center" title="Centralizar">■</button>
+                        <button class="format-button" id="align-right" title="Alinhar à Direita">▶</button>
+                    </div>
+                </div>
+                
+                <div class="format-group">
+                    <div class="format-label">Formato Numérico</div>
+                    <select class="format-select" id="number-format">
+                        <option value="general">Geral</option>
+                        <option value="currency">Moeda</option>
+                        <option value="percentage">Percentual</option>
+                        <option value="date">Data</option>
+                        <option value="time">Hora</option>
+                    </select>
+                </div>
+                
+                <div class="format-group">
+                    <div class="format-label">Bordas</div>
+                    <div class="format-buttons">
+                        <button class="format-button" id="border-all" title="Todas as Bordas">□</button>
+                        <button class="format-button" id="border-outside" title="Bordas Externas">▢</button>
+                        <button class="format-button" id="border-none" title="Sem Bordas">×</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="format-row">
+                <button class="control-button" id="apply-style-btn">Aplicar Estilo Completo</button>
+                <button class="control-button" id="clear-format-btn">Limpar Formatação</button>
+                <button class="control-button" id="resetar-btn">Resetar Tabela</button>
+            </div>
+        </div>
+        
+        <div class="spreadsheet-demo">
+            <table id="data-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>A</th>
+                        <th>B</th>
+                        <th>C</th>
+                        <th>D</th>
+                        <th>E</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td></td>
+                        <td></td>
+                        <td>Relatório de Vendas</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td></td>
+                        <td>Produto</td>
+                        <td>Quantidade</td>
+                        <td>Valor Unit.</td>
+                        <td>Total</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td></td>
+                        <td>Visor Holográfico</td>
+                        <td>12</td>
+                        <td>2500</td>
+                        <td>30000</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td></td>
+                        <td>Console Estelar</td>
+                        <td>8</td>
+                        <td>4200</td>
+                        <td>33600</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td></td>
+                        <td>Processador Quântico</td>
+                        <td>15</td>
+                        <td>1800</td>
+                        <td>27000</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td>Total:</td>
+                        <td>90600</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td></td>
+                        <td>Data do Relatório:</td>
+                        <td>15/03/2025</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="format-samples">
+            <div class="format-example">
+                <div class="example-label">Formatação de Moeda</div>
+                <div id="sample-currency">R$ 1.234,56</div>
+            </div>
+            <div class="format-example">
+                <div class="example-label">Formatação de Percentual</div>
+                <div id="sample-percentage">25,5%</div>
+            </div>
+            <div class="format-example">
+                <div class="example-label">Formatação de Data</div>
+                <div id="sample-date">15/03/2025</div>
+            </div>
+            <div class="format-example">
+                <div class="example-label">Formatação de Hora</div>
+                <div id="sample-time">14:30:00</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="content-section" id="tutorial">
+        <h2 class="section-title">Tutorial Passo a Passo</h2>
+        
+        <div class="tutorial-steps">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>Formatação de Texto</h3>
+                    <p>A formatação de texto permite alterar a aparência visual das informações em suas células. Para aplicar formatação, selecione as células desejadas e use as opções da guia Página Inicial. Você pode alterar a fonte, o tamanho, a cor e aplicar estilos como <span class="keyboard-shortcut">Negrito (Ctrl+N)</span>, <span class="keyboard-shortcut">Itálico (Ctrl+I)</span> e <span class="keyboard-shortcut">Sublinhado (Ctrl+S)</span>. Para acessar opções mais avançadas, clique no iniciador de caixa de diálogo no canto inferior direito do grupo Fonte, que abrirá a caixa de diálogo completa de Formatação de Células. Lá você encontrará efeitos adicionais como tachado, sobrescrito, subscrito e muito mais.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Formatação Numérica</h3>
+                    <p>O Excel oferece vários formatos pré-definidos para exibir valores numéricos. Selecione as células e use as opções no grupo Número da guia Página Inicial, ou pressione <span class="keyboard-shortcut">Ctrl+1</span> para abrir a caixa de diálogo Formatar Células e acesse a guia Número. Os formatos mais comuns incluem: <span class="keyboard-shortcut">Moeda</span> (exibe valores com símbolo monetário e casas decimais fixas), <span class="keyboard-shortcut">Contábil</span> (similar ao formato moeda, mas alinha os símbolos monetários), <span class="keyboard-shortcut">Percentual</span> (multiplica o valor por 100 e adiciona o símbolo %), <span class="keyboard-shortcut">Fração</span> (exibe números como frações), <span class="keyboard-shortcut">Científico</span> (para notação científica) e <span class="keyboard-shortcut">Personalizado</span> (para criar formatos específicos). Você pode especificar o número de casas decimais clicando nos botões de aumento/diminuição de casas decimais no grupo Número.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Formatação de Datas e Horas</h3>
+                    <p>O Excel reconhece datas e horas como valores numéricos especiais. Para formatar esses valores, selecione as células e escolha um formato na categoria Data ou Hora na caixa de diálogo Formatar Células. Alguns formatos populares incluem: <span class="keyboard-shortcut">dd/mm/aaaa</span> (14/03/2025), <span class="keyboard-shortcut">dd-mmm-aa</span> (14-mar-25), <span class="keyboard-shortcut">d de mmmm de aaaa</span> (14 de março de 2025), <span class="keyboard-shortcut">hh:mm</span> (14:30), <span class="keyboard-shortcut">hh:mm:ss</span> (14:30:45). Você também pode criar formatos personalizados que combinam datas e horas. Para formatar corretamente datas importadas como texto, use as funções DATADIF ou VALOR.TEXTO para converter o texto em valores de data reconhecidos pelo Excel.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h3>Alinhamento e Orientação</h3>
+                    <p>O alinhamento adequado facilita a leitura e a navegação pelos dados. Acesse as opções de alinhamento no grupo Alinhamento da guia Página Inicial ou na guia Alinhamento da caixa de diálogo Formatar Células. Para alinhamento horizontal, você pode escolher entre <span class="keyboard-shortcut">Esquerda</span> (padrão para texto), <span class="keyboard-shortcut">Centro</span>, <span class="keyboard-shortcut">Direita</span> (padrão para números) e <span class="keyboard-shortcut">Justificado</span>. Para alinhamento vertical, as opções são <span class="keyboard-shortcut">Superior</span>, <span class="keyboard-shortcut">Central</span> e <span class="keyboard-shortcut">Inferior</span>. Você também pode controlar a orientação do texto usando o botão Orientação ou ajustando o ângulo na caixa de diálogo Formatar Células. A opção <span class="keyboard-shortcut">Quebrar Texto Automaticamente</span> faz com que o texto longo seja exibido em várias linhas dentro da mesma célula, enquanto a opção <span class="keyboard-shortcut">Mesclar e Centralizar</span> combina várias células em uma só, ideal para títulos.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                    <h3>Bordas e Preenchimento</h3>
+                    <p>Bordas e cores de preenchimento ajudam a destacar informações e organizar visualmente sua planilha. Acesse estas opções no grupo Fonte da guia Página Inicial ou na guia Bordas da caixa de diálogo Formatar Células. Para bordas, você pode escolher o estilo da linha, a cor e quais bordas aplicar (todas, externas, superior, inferior, etc.). Para adicionar preenchimento colorido, use o botão Cor de Preenchimento na guia Página Inicial ou a guia Preenchimento na caixa de diálogo Formatar Células. Além de cores sólidas, você pode aplicar preenchimentos com padrões ou gradientes. Uma técnica útil é a alternância de cores nas linhas (ou colunas) para facilitar a leitura de grandes tabelas - isso pode ser feito manualmente ou usando a opção de formatação como tabela (guia Página Inicial > Formatar como Tabela).</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">6</div>
+                <div class="step-content">
+                    <h3>Estilos e Temas</h3>
+                    <p>O Excel oferece estilos predefinidos e temas que permitem formatar sua planilha de forma rápida e profissional. Use a galeria de <span class="keyboard-shortcut">Estilos de Célula</span> na guia Página Inicial para aplicar combinações predefinidas de formatação (fonte, preenchimento, bordas) a células selecionadas. Para aplicar um estilo consistente à planilha inteira, use os <span class="keyboard-shortcut">Temas</span> disponíveis na guia Layout da Página. Os temas afetam cores, fontes e efeitos em toda a planilha. Você também pode criar seu próprio estilo personalizado: formate uma célula como desejado, clique com o botão direito sobre ela e escolha "Estilos > Novo Estilo de Célula". Dê um nome ao estilo e defina quais elementos de formatação ele deve incluir. Depois, você poderá aplicar esse estilo a outras células da mesma forma que os estilos predefinidos.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="navigation-buttons">
+            <button class="nav-button previous">← Aula Anterior</button>
+            <button class="nav-button next">Próxima Aula →</button>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">Prisma Arena - Aula 3</div>
+            <p>Explorando o universo do Excel com tecnologia estelar</p>
+            <div class="footer-nav">
+                <a href="#inicio">Início</a>
+                <a href="#recursos">Recursos</a>
+                <a href="#demo">Demonstração</a>
+                <a href="#tutorial">Tutorial</a>
+                <a href="index.html">Menu Principal</a>
+            </div>
+            <p class="copyright">© 2025 Prisma Arena. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Criar efeito de estrelas
+        document.addEventListener('DOMContentLoaded', function() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 100;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                star.style.width = `${Math.random() * 3 + 1}px`;
+                star.style.height = star.style.width;
+                starsContainer.appendChild(star);
+            }
+
+            // Funcionalidade de seleção de células
+            const table = document.getElementById('data-table');
+            let selectedCell = null;
+            
+            // Adicionando event listeners para as células da tabela
+            for (let i = 1; i < table.rows.length; i++) {
+                for (let j = 1; j < table.rows[i].cells.length; j++) {
+                    const cell = table.rows[i].cells[j];
+                    
+                    cell.addEventListener('click', function() {
+                        // Remover a classe da célula anteriormente selecionada
+                        if (selectedCell) {
+                            selectedCell.classList.remove('selected-cell');
+                        }
+                        
+                        // Adicionar a classe à nova célula selecionada
+                        this.classList.add('selected-cell');
+                        selectedCell = this;
+                    });
+                }
+            }
+            
+            // Formatação de texto
+            document.getElementById('font-select').addEventListener('change', function() {
+                if (selectedCell) {
+                    selectedCell.style.fontFamily = this.value;
+                }
+            });
+            
+            document.getElementById('size-select').addEventListener('change', function() {
+                if (selectedCell) {
+                    selectedCell.style.fontSize = this.value + 'px';
+                }
+            });
+            
+            document.getElementById('bold-btn').addEventListener('click', function() {
+                if (selectedCell) {
+                    if (selectedCell.style.fontWeight === 'bold') {
+                        selectedCell.style.fontWeight = 'normal';
+                    } else {
+                        selectedCell.style.fontWeight = 'bold';
+                    }
+                }
+            });
+            
+            document.getElementById('italic-btn').addEventListener('click', function() {
+                if (selectedCell) {
+                    if (selectedCell.style.fontStyle === 'italic') {
+                        selectedCell.style.fontStyle = 'normal';
+                    } else {
+                        selectedCell.style.fontStyle = 'italic';
+                    }
+                }
+            });
+            
+            document.getElementById('underline-btn').addEventListener('click', function() {
+                if (selectedCell) {
+                    if (selectedCell.style.textDecoration === 'underline') {
+                        selectedCell.style.textDecoration = 'none';
+                    } else {
+                        selectedCell.style.textDecoration = 'underline';
+                    }
+                }
+            });
+            
+            // Cores
+            const colorSwatches = document.querySelectorAll('.color-swatch[data-color]');
+            colorSwatches.forEach(swatch => {
+                swatch.addEventListener('click', function() {
+                    if (selectedCell) {
+                        selectedCell.style.color = this.getAttribute('data-color');
+                    }
+                });
+            });
+            
+            const fillSwatches = document.querySelectorAll('.color-swatch[data-fill]');
+            fillSwatches.forEach(swatch => {
+                swatch.addEventListener('click', function() {
+                    if (selectedCell) {
+                        selectedCell.style.backgroundColor = this.getAttribute('data-fill');
+                    }
+                });
+            });
+            
+            // Alinhamento
+            document.getElementById('align-left').addEventListener('click', function() {
+                if (selectedCell) {
+                    selectedCell.style.textAlign = 'left';
+                }
+            });
+            
+            document.getElementById('align-center').addEventListener('click', function() {
+                if (selectedCell) {
+                    selectedCell.style.textAlign = 'center';
+                }
+            });
+            
+            document.getElementById('align-right').addEventListener('click', function() {
+                if (selectedCell) {
+                    selectedCell.style.textAlign = 'right';
+                }
+            });
+            
+            // Formato numérico
+            document.getElementById('number-format').addEventListener('change', function() {
+                if (selectedCell) {
+                    const value = selectedCell.textContent.trim();
+                    const numValue = parseFloat(value.replace(/[^\d.-]/g, ''));
+                    
+                    if (!isNaN(numValue)) {
+                        switch (this.value) {
+                            case 'general':
+                                selectedCell.textContent = numValue;
+                                break;
+                            case 'currency':
+                                selectedCell.textContent = new Intl.NumberFormat('pt-BR', { 
+                                    style: 'currency', 
+                                    currency: 'BRL' 
+                                }).format(numValue);
+                                break;
+                            case 'percentage':
+                                selectedCell.textContent = new Intl.NumberFormat('pt-BR', { 
+                                    style: 'percent',
+                                    minimumFractionDigits: 1,
+                                    maximumFractionDigits: 1
+                                }).format(numValue / 100);
+                                break;
+                            case 'date':
+                                try {
+                                    const date = new Date(numValue);
+                                    selectedCell.textContent = date.toLocaleDateString('pt-BR');
+                                } catch (e) {
+                                    alert('O valor não pôde ser convertido para data.');
+                                }
+                                break;
+                            case 'time':
+                                try {
+                                    const hours = Math.floor(numValue);
+                                    const minutes = Math.floor((numValue - hours) * 60);
+                                    const seconds = Math.floor(((numValue - hours) * 60 - minutes) * 60);
+                                    selectedCell.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                                } catch (e) {
+                                    alert('O valor não pôde ser convertido para hora.');
+                                }
+                                break;
+                        }
+                    }
+                }
+            });
+            
+            // Bordas
+            document.getElementById('border-all').addEventListener('click', function() {
+                if (selectedCell) {
+                    selectedCell.style.border = '1px solid #BF7AF0';
+                }
+            });
+            
+            document.getElementById('border-outside').addEventListener('click', function() {
+                if (selectedCell) {
+                    selectedCell.style.border = 'none';
+                    selectedCell.style.outline = '2px solid #BF7AF0';
+                }
+            });
+            
+            document.getElementById('border-none').addEventListener('click', function() {
+                if (selectedCell) {
+                    selectedCell.style.border = '1px solid var(--cell-border)';
+                    selectedCell.style.outline = 'none';
+                }
+            });
+            
+            // Aplicar estilo completo
+            document.getElementById('apply-style-btn').addEventListener('click', function() {
+                if (selectedCell) {
+                    // Aplicar um estilo predefinido
+                    selectedCell.style.fontFamily = 'Segoe UI';
+                    selectedCell.style.fontSize = '14px';
+                    selectedCell.style.fontWeight = 'bold';
+                    selectedCell.style.color = '#F5C6FF';
+                    selectedCell.style.backgroundColor = 'rgba(87, 39, 163, 0.4)';
+                    selectedCell.style.textAlign = 'center';
+                    selectedCell.style.padding = '10px';
+                    selectedCell.style.border = '1px solid #9152E0';
+                    
+                    alert('Estilo completo aplicado à célula selecionada!');
+                } else {
+                    alert('Por favor, selecione uma célula primeiro.');
+                }
+            });
+            
+            // Limpar formatação
+            document.getElementById('clear-format-btn').addEventListener('click', function() {
+                if (selectedCell) {
+                    selectedCell.removeAttribute('style');
+                    selectedCell.classList.add('selected-cell');
+                    
+                    alert('Formatação da célula removida!');
+                } else {
+                    alert('Por favor, selecione uma célula primeiro.');
+                }
+            });
+            
+            // Resetar tabela
+            document.getElementById('resetar-btn').addEventListener('click', function() {
+                location.reload();
+            });
+            
+            // Manipulador para os botões de navegação
+            document.querySelector('.previous').addEventListener('click', function() {
+                window.location.href = 'aula2_operacoes_basicas.html';
+            });
+            
+            document.querySelector('.next').addEventListener('click', function() {
+                window.location.href = 'aula4_formulas.html';
+            });
+            
+            // Adicionar smooth scroll para navegação
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+            
+            // Animação para o botão CTA
+            document.querySelector('.cta-button').addEventListener('click', function() {
+                document.querySelector('#recursos').scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

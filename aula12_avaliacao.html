@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prisma Arena - Aula 12: Avaliação de Final de Módulo</title>
+    <style>
+        :root {
+            --primary-color: #2e0259;
+            --secondary-color: #5727a3;
+            --accent-color: #9152e0;
+            --highlight-color: #bf7af0;
+            --star-color: #f5c6ff;
+            --text-color: #ffffff;
+            --dark-bg: #0a0118;
+            --cell-border: #5727a3;
+            --grid-bg: rgba(15, 3, 40, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(145, 82, 224, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 70% 60%, rgba(191, 122, 240, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 40% 80%, rgba(245, 198, 255, 0.08) 0%, transparent 20%);
+            overflow-x: hidden;
+        }
+
+        header {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(145, 82, 224, 0.5);
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--star-color), var(--highlight-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(245, 198, 255, 0.3);
+            display: flex;
+            align-items: center;
+        }
+
+        .logo::before {
+            content: "✧";
+            margin-right: 0.5rem;
+            font-size: 1.8rem;
+            -webkit-text-fill-color: var(--star-color);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--highlight-color);
+            transition: width 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--highlight-color);
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4rem 1rem;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, var(--accent-color), var(--highlight-color), var(--star-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            max-width: 700px;
+            margin-bottom: 2.5rem;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #d8c3e9;
+        }
+
+        .cta-button {
+            background: linear-gradient(45deg, var(--accent-color), var(--highlight-color));
+            color: var(--text-color);
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(145, 82, 224, 0.5);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(145, 82, 224, 0.7);
+        }
+
+        .content-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 1rem;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 2.5rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: "";
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(to right, var(--accent-color), var(--highlight-color));
+        }
+
+        .evaluation-overview {
+            background-color: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 10px;
+            padding: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .overview-title {
+            font-size: 1.5rem;
+            color: var(--highlight-color);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .overview-desc {
+            color: #d8c3e9;
+            line-height: 1.6;
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .overview-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .detail-item {
+            background-color: rgba(87, 39, 163, 0.2);
+            border-radius: 8px;
+            padding: 1.2rem;
+            text-align: center;
+        }
+
+        .detail-icon {
+            font-size: 2rem;
+            color: var(--star-color);
+            margin-bottom: 0.8rem;
+        }
+
+        .detail-title {
+            font-size: 1.1rem;
+            color: var(--highlight-color);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .detail-text {
+            color: #d8c3e9;
+            font-size: 0.95rem;
+        }
+
+        .instructions-card {
+            background-color: rgba(46, 2, 89, 0.5);
+            border: 1px solid var(--accent-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .instruction-title {
+            font-size: 1.3rem;
+            color: var(--highlight-color);
+            margin-bottom: 1rem;
+        }
+
+        .instruction-list {
+            list-style-position: inside;
+            color: #d8c3e9;
+            margin-bottom: 1.5rem;
+        }
+
+        .instruction-item {
+            margin-bottom: 0.8rem;
+            line-height: 1.5;
+        }
+
+        .instruction-note {
+            background-color: rgba(87, 39, 163, 0.2);
+            border-left: 3px solid var(--highlight-color);
+            padding: 1rem;
+            font-style: italic;
+            color: var(--star-color);
+        }
+
+        .evaluation-questions {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+
+        .question-card {
+            background: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .question-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1.2rem;
+        }
+
+        .question-number {
+            background-color: var(--secondary-color);
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .question-title {
+            font-size: 1.2rem;
+            color: var(--highlight-color);
+            font-weight: 600;
+            line-height: 1.4;
+        }
+
+        .question-desc {
+            color: #d8c3e9;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+        }
+
+        .question-image {
+            width: 100%;
+            max-width: 600px;
+            margin: 1rem auto;
+            display: block;
+            border: 1px solid var(--secondary-color);
+            border-radius: 8px;
+        }
+
+        .question-points {
+            display: inline-block;
+            background-color: rgba(87, 39, 163, 0.3);
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            color: var(--star-color);
+            margin-top: 1rem;
+        }
+
+        .help-tip {
+            background-color: rgba(87, 39, 163, 0.2);
+            border-left: 3px solid var(--highlight-color);
+            padding: 0.8rem;
+            margin-top: 1rem;
+            font-style: italic;
+            color: var(--star-color);
+            font-size: 0.9rem;
+        }
+
+        .demo-section {
+            background: var(--grid-bg);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 4rem auto;
+            max-width: 1000px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--secondary-color);
+        }
+
+        .final-notes {
+            text-align: center;
+            padding: 2rem;
+            background-color: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 10px;
+            margin-top: 3rem;
+        }
+
+        .certificate-info {
+            font-size: 1.2rem;
+            color: var(--highlight-color);
+            margin-bottom: 1rem;
+        }
+
+        .next-steps {
+            color: #d8c3e9;
+            line-height: 1.6;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .download-button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1.5rem;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            font-weight: 500;
+        }
+
+        .download-button:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .completion-tracker {
+            margin-top: 2rem;
+            text-align: center;
+        }
+
+        .progress-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: rgba(46, 2, 89, 0.3);
+            border-radius: 50px;
+            height: 16px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(to right, var(--accent-color), var(--highlight-color));
+            width: 100%;
+            border-radius: 50px;
+        }
+
+        .progress-text {
+            margin-top: 0.5rem;
+            color: var(--star-color);
+            font-size: 0.9rem;
+        }
+
+        .celebration {
+            margin-top: 1.5rem;
+            font-size: 2rem;
+            color: var(--highlight-color);
+        }
+
+        footer {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 3rem 1rem;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--star-color), var(--highlight-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+
+        .footer-nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .footer-nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-nav a:hover {
+            color: var(--highlight-color);
+        }
+
+        .copyright {
+            margin-top: 2rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        /* Efeito de partículas estelares */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background-color: var(--star-color);
+            border-radius: 50%;
+            animation: twinkle 5s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 0.2;
+                transform: scale(0.8);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+        }
+
+        .nav-button {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-button:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .next-hidden {
+            visibility: hidden;
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul {
+                gap: 1rem;
+                margin-top: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .instruction-list {
+                padding-left: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Efeito de estrelas -->
+    <div class="stars" id="stars"></div>
+
+    <header>
+        <div class="nav-container">
+            <div class="logo">Prisma Arena - Aula 12</div>
+            <nav>
+                <ul>
+                    <li><a href="#inicio">Início</a></li>
+                    <li><a href="#instrucoes">Instruções</a></li>
+                    <li><a href="#avaliacao">Avaliação</a></li>
+                    <li><a href="#conclusao">Conclusão</a></li>
+                    <li><a href="index.html">Voltar ao Menu</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero" id="inicio">
+        <h1>Avaliação Final do Módulo Excel</h1>
+        <p>Chegamos ao momento de avaliar seu conhecimento e colocar em prática tudo o que você aprendeu ao longo deste curso. Esta avaliação integra conceitos de todas as aulas anteriores e permitirá demonstrar sua maestria no Excel.</p>
+        <button class="cta-button">Iniciar Avaliação</button>
+    </section>
+
+    <section class="content-section" id="instrucoes">
+        <h2 class="section-title">Informações da Avaliação</h2>
+        
+        <div class="evaluation-overview">
+            <h3 class="overview-title">Visão Geral da Avaliação</h3>
+            <p class="overview-desc">A avaliação final visa testar sua compreensão e habilidade prática em relação a todos os conceitos abordados no curso de Excel. Você terá a oportunidade de demonstrar suas competências em um projeto abrangente e em questões específicas.</p>
+            
+            <div class="overview-details">
+                <div class="detail-item">
+                    <div class="detail-icon">⏱️</div>
+                    <div class="detail-title">Duração</div>
+                    <div class="detail-text">2 horas para conclusão completa</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon">📝</div>
+                    <div class="detail-title">Formato</div>
+                    <div class="detail-text">1 projeto prático + 5 questões específicas</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon">🎯</div>
+                    <div class="detail-title">Nota Mínima</div>
+                    <div class="detail-text">70% para aprovação no módulo</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-icon">🏆</div>
+                    <div class="detail-title">Certificação</div>
+                    <div class="detail-text">Certificado digital após aprovação</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="instructions-card">
+            <h3 class="instruction-title">Instruções para a Avaliação</h3>
+            <ol class="instruction-list">
+                <li class="instruction-item">Baixe o arquivo de avaliação "Avaliacao_Final_Excel.xlsx" disponível no botão abaixo.</li>
+                <li class="instruction-item">O arquivo contém várias planilhas, cada uma correspondendo a uma parte da avaliação.</li>
+                <li class="instruction-item">Leia atentamente as instruções contidas em cada planilha antes de iniciar cada exercício.</li>
+                <li class="instruction-item">Complete todos os exercícios dentro do tempo estipulado (2 horas).</li>
+                <li class="instruction-item">Salve regularmente seu trabalho para evitar perda de progresso.</li>
+                <li class="instruction-item">Ao finalizar, envie o arquivo completo através do botão "Enviar Avaliação" disponível na última planilha.</li>
+                <li class="instruction-item">Sua avaliação será corrigida e você receberá feedback detalhado em até 48 horas.</li>
+            </ol>
+            
+            <div class="instruction-note">
+                Importante: Esta avaliação é individual. Você pode consultar suas anotações e os materiais do curso, mas não deve pedir ajuda externa durante a realização dos exercícios.
+            </div>
+            
+            <button class="download-button" style="margin-top: 1.5rem;">
+                <span>Baixar Arquivo de Avaliação</span>
+                <span>↓</span>
+            </button>
+        </div>
+    </section>
+
+    <section class="demo-section" id="avaliacao">
+        <h2 class="section-title">Conteúdo da Avaliação</h2>
+        <p style="text-align: center; margin-bottom: 2rem; color: #d8c3e9;">A seguir, você encontrará uma prévia do que será abordado em cada parte da avaliação final. Prepare-se para colocar em prática todos os conhecimentos adquiridos!</p>
+        
+        <div class="evaluation-questions">
+            <div class="question-card">
+                <div class="question-header">
+                    <div class="question-number">P</div>
+                    <div class="question-title">Projeto Principal: Dashboard de Análise de Vendas</div>
+                </div>
+                <div class="question-desc">
+                    <p>Desenvolva um dashboard completo de análise de vendas a partir dos dados brutos fornecidos. Seu dashboard deve incluir análises de tendências, comparações por região e categoria, e indicadores-chave de desempenho (KPIs).</p>
+                    
+                    <p>Requisitos específicos:</p>
+                    <ul style="color: #d8c3e9; margin-left: 1.5rem; margin-top: 0.5rem;">
+                        <li>Formatação adequada de todos os dados</li>
+                        <li>Uso de pelo menos 5 funções diferentes</li>
+                        <li>Criação de pelo menos 3 tipos de gráficos diferentes</li>
+                        <li>Implementação de tabela dinâmica com segmentação de dados</li>
+                        <li>Aplicação de formatação condicional para destacar informações relevantes</li>
+                        <li>Criação de fórmulas que utilizem referências absolutas e relativas</li>
+                    </ul>
+                </div>
+                <div class="question-points">Valor: 50 pontos</div>
+                <div class="help-tip">
+                    Dica: Planeje seu dashboard antes de começar a construí-lo. Identifique quais informações são mais relevantes para destacar e escolha os gráficos mais adequados para cada tipo de análise.
+                </div>
+            </div>
+            
+            <div class="question-card">
+                <div class="question-header">
+                    <div class="question-number">1</div>
+                    <div class="question-title">Fórmulas e Funções</div>
+                </div>
+                <div class="question-desc">
+                    Complete as fórmulas ausentes na planilha "Exercício 1" para calcular totais, médias, valores máximos e mínimos, e contagens condicionais conforme as especificações fornecidas. Você precisará combinar diferentes funções e utilizar referências adequadas.
+                </div>
+                <div class="question-points">Valor: 10 pontos</div>
+            </div>
+            
+            <div class="question-card">
+                <div class="question-header">
+                    <div class="question-number">2</div>
+                    <div class="question-title">Formatação e Formatação Condicional</div>
+                </div>
+                <div class="question-desc">
+                    Aplique formatação adequada aos dados na planilha "Exercício 2" e implemente regras de formatação condicional conforme as instruções. Você deverá destacar valores acima/abaixo da média, identificar duplicatas e criar escalas de cores para diferentes faixas de valores.
+                </div>
+                <div class="question-points">Valor: 10 pontos</div>
+            </div>
+            
+            <div class="question-card">
+                <div class="question-header">
+                    <div class="question-number">3</div>
+                    <div class="question-title">Travamento de Fórmulas e Função ÍNDICE</div>
+                </div>
+                <div class="question-desc">
+                    Na planilha "Exercício 3", complete a tabela de consulta utilizando referências absolutas, relativas e mistas adequadamente. Implemente também a função ÍNDICE para localizar valores específicos na tabela conforme os critérios fornecidos.
+                </div>
+                <div class="question-points">Valor: 10 pontos</div>
+            </div>
+            
+            <div class="question-card">
+                <div class="question-header">
+                    <div class="question-number">4</div>
+                    <div class="question-title">Gráficos</div>
+                </div>
+                <div class="question-desc">
+                    Crie os gráficos solicitados na planilha "Exercício 4", garantindo que cada um seja do tipo adequado para a análise desejada. Personalize títulos, legendas, cores e outros elementos para maximizar a clareza visual e o impacto comunicativo dos dados.
+                </div>
+                <div class="question-points">Valor: 10 pontos</div>
+            </div>
+            
+            <div class="question-card">
+                <div class="question-header">
+                    <div class="question-number">5</div>
+                    <div class="question-title">Tabelas Dinâmicas</div>
+                </div>
+                <div class="question-desc">
+                    Construa as tabelas dinâmicas solicitadas na planilha "Exercício 5", incluindo os cálculos especificados, agrupamentos e formatação. Adicione segmentação de dados para filtrar as informações e crie um gráfico dinâmico vinculado à tabela principal.
+                </div>
+                <div class="question-points">Valor: 10 pontos</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="content-section" id="conclusao">
+        <h2 class="section-title">Conclusão do Módulo</h2>
+        
+        <div class="final-notes">
+            <div class="certificate-info">Parabéns por Concluir o Módulo Excel!</div>
+            <p class="next-steps">
+                Você chegou ao fim da jornada pelo módulo fundamental de Excel da Prisma Arena. Após concluir a avaliação final, você estará apto a receber seu certificado digital de conclusão e poderá avançar para os módulos intermediários e avançados, onde explorará recursos ainda mais poderosos do Excel.
+            </p>
+            
+            <div class="completion-tracker">
+                <div class="progress-container">
+                    <div class="progress-bar"></div>
+                </div>
+                <div class="progress-text">Módulo 1 - Fundamentos do Excel: 100% Concluído</div>
+                <div class="celebration">🎉</div>
+            </div>
+            
+            <button class="download-button" style="margin-top: 2rem;">
+                <span>Próximos Módulos</span>
+                <span>→</span>
+            </button>
+        </div>
+        
+        <div class="navigation-buttons">
+            <button class="nav-button previous">← Aula Anterior</button>
+            <button class="nav-button next next-hidden">Próxima Aula →</button>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">Prisma Arena - Aula 12</div>
+            <p>Explorando o universo do Excel com tecnologia estelar</p>
+            <div class="footer-nav">
+                <a href="#inicio">Início</a>
+                <a href="#instrucoes">Instruções</a>
+                <a href="#avaliacao">Avaliação</a>
+                <a href="#conclusao">Conclusão</a>
+                <a href="index.html">Menu Principal</a>
+            </div>
+            <p class="copyright">© 2025 Prisma Arena. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Criar efeito de estrelas
+        document.addEventListener('DOMContentLoaded', function() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 100;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                star.style.width = `${Math.random() * 3 + 1}px`;
+                star.style.height = star.style.width;
+                starsContainer.appendChild(star);
+            }
+
+            // Botões de download (simulação)
+            const downloadButtons = document.querySelectorAll('.download-button');
+            downloadButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    alert('Em um ambiente real, este botão permitiria o download do arquivo de avaliação ou o acesso aos próximos módulos. Esta é uma demonstração simulada.');
+                });
+            });
+            
+            // Manipulador para os botões de navegação
+            document.querySelector('.previous').addEventListener('click', function() {
+                window.location.href = 'aula11_revisao.html';
+            });
+            
+            // Adicionar smooth scroll para navegação
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+            
+            // Animação para o botão CTA
+            document.querySelector('.cta-button').addEventListener('click', function() {
+                document.querySelector('#instrucoes').scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+            
+            // Simulação de carregamento progressivo das questões
+            const questionCards = document.querySelectorAll('.question-card');
+            
+            function fadeInCards() {
+                questionCards.forEach((card, index) => {
+                    setTimeout(() => {
+                        card.style.opacity = '0';
+                        card.style.transform = 'translateY(20px)';
+                        card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                        
+                        setTimeout(() => {
+                            card.style.opacity = '1';
+                            card.style.transform = 'translateY(0)';
+                        }, 100);
+                    }, index * 300);
+                });
+            }
+            
+            // Executar quando o elemento estiver visível
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        fadeInCards();
+                        observer.disconnect();
+                    }
+                });
+            });
+            
+            if (questionCards.length > 0) {
+                observer.observe(document.querySelector('.evaluation-questions'));
+            }
+        });
+    </script>
+</body>
+</html>

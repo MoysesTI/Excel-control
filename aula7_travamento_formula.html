@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prisma Arena - Aula 7: Travamento de Fórmula</title>
+    <style>
+        :root {
+            --primary-color: #2e0259;
+            --secondary-color: #5727a3;
+            --accent-color: #9152e0;
+            --highlight-color: #bf7af0;
+            --star-color: #f5c6ff;
+            --text-color: #ffffff;
+            --dark-bg: #0a0118;
+            --cell-border: #5727a3;
+            --grid-bg: rgba(15, 3, 40, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(145, 82, 224, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 70% 60%, rgba(191, 122, 240, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 40% 80%, rgba(245, 198, 255, 0.08) 0%, transparent 20%);
+            overflow-x: hidden;
+        }
+
+        header {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(145, 82, 224, 0.5);
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--star-color), var(--highlight-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(245, 198, 255, 0.3);
+            display: flex;
+            align-items: center;
+        }
+
+        .logo::before {
+            content: "✧";
+            margin-right: 0.5rem;
+            font-size: 1.8rem;
+            -webkit-text-fill-color: var(--star-color);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--highlight-color);
+            transition: width 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--highlight-color);
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4rem 1rem;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, var(--accent-color), var(--highlight-color), var(--star-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            max-width: 700px;
+            margin-bottom: 2.5rem;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #d8c3e9;
+        }
+
+        .cta-button {
+            background: linear-gradient(45deg, var(--accent-color), var(--highlight-color));
+            color: var(--text-color);
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(145, 82, 224, 0.5);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(145, 82, 224, 0.7);
+        }
+
+        .content-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 1rem;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 2.5rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: "";
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(to right, var(--accent-color), var(--highlight-color));
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .feature-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(145, 82, 224, 0.1), rgba(191, 122, 240, 0.1));
+            z-index: -1;
+            transform: translateY(100%);
+            transition: transform 0.5s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(145, 82, 224, 0.3);
+        }
+
+        .feature-card:hover::before {
+            transform: translateY(0);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--highlight-color);
+        }
+
+        .feature-card h3 {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            color: var(--highlight-color);
+        }
+
+        .feature-card p {
+            color: #d8c3e9;
+            line-height: 1.5;
+        }
+
+        .demo-section {
+            background: var(--grid-bg);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 4rem auto;
+            max-width: 1000px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--secondary-color);
+        }
+
+        .formula-builder {
+            background-color: rgba(46, 2, 89, 0.5);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            border: 1px solid var(--accent-color);
+        }
+
+        .formula-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .formula-label {
+            font-weight: bold;
+            color: var(--star-color);
+            min-width: 120px;
+        }
+
+        .formula-input {
+            flex-grow: 1;
+            background-color: rgba(10, 1, 24, 0.7);
+            border: 1px solid var(--secondary-color);
+            color: white;
+            padding: 0.8rem;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+
+        .reference-type {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .reference-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .reference-radio {
+            appearance: none;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            border: 2px solid var(--accent-color);
+            background-color: transparent;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .reference-radio:checked::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            background-color: var(--highlight-color);
+        }
+
+        .formula-button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .formula-button:hover {
+            background-color: var(--accent-color);
+        }
+
+        .formula-preview {
+            font-family: monospace;
+            background-color: rgba(10, 1, 24, 0.7);
+            padding: 1rem;
+            border-radius: 4px;
+            color: var(--highlight-color);
+            margin-top: 1rem;
+            border: 1px dashed var(--secondary-color);
+            min-height: 3rem;
+        }
+
+        .cell-highlight {
+            display: inline-block;
+            background-color: rgba(191, 122, 240, 0.3);
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .spreadsheet-demo {
+            overflow-x: auto;
+            margin-top: 2rem;
+            background-color: rgba(10, 1, 24, 0.7);
+            border-radius: 8px;
+            border: 1px solid var(--secondary-color);
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 800px;
+        }
+
+        th, td {
+            border: 1px solid var(--cell-border);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: rgba(87, 39, 163, 0.1);
+        }
+
+        tr:hover {
+            background-color: rgba(145, 82, 224, 0.2);
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .control-button {
+            background: var(--primary-color);
+            color: var(--text-color);
+            border: 1px solid var(--accent-color);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .selected-cell {
+            background-color: rgba(191, 122, 240, 0.3) !important;
+        }
+
+        .tutorial-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .step-card {
+            background: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 10px;
+            padding: 2rem;
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .step-content h3 {
+            margin-bottom: 1rem;
+            color: var(--highlight-color);
+        }
+
+        .step-content p {
+            color: #d8c3e9;
+            line-height: 1.6;
+        }
+
+        .keyboard-shortcut {
+            display: inline-block;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            margin: 0 0.2rem;
+        }
+
+        .reference-examples {
+            margin-top: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .reference-card {
+            background-color: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 8px;
+            padding: 1rem;
+            transition: transform 0.3s;
+        }
+
+        .reference-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(145, 82, 224, 0.3);
+        }
+
+        .reference-title {
+            color: var(--highlight-color);
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+
+        .reference-code {
+            font-family: monospace;
+            background-color: rgba(10, 1, 24, 0.6);
+            padding: 0.5rem;
+            border-radius: 4px;
+            color: var(--star-color);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .reference-desc {
+            color: #d8c3e9;
+            font-size: 0.9rem;
+        }
+
+        .indice-formula {
+            margin-top: 2rem;
+            background-color: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+        }
+
+        .indice-title {
+            color: var(--highlight-color);
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .indice-syntax {
+            font-family: monospace;
+            background-color: rgba(10, 1, 24, 0.6);
+            padding: 1rem;
+            border-radius: 4px;
+            color: var(--star-color);
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .indice-params {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .param-card {
+            background-color: rgba(87, 39, 163, 0.2);
+            border: 1px dashed var(--accent-color);
+            border-radius: 4px;
+            padding: 0.5rem 1rem;
+            color: var(--text-color);
+            flex-basis: 200px;
+        }
+
+        .param-name {
+            color: var(--highlight-color);
+            font-weight: bold;
+            margin-bottom: 0.3rem;
+        }
+
+        .param-desc {
+            font-size: 0.9rem;
+            color: #d8c3e9;
+        }
+
+        footer {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 3rem 1rem;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--star-color), var(--highlight-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+
+        .footer-nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .footer-nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-nav a:hover {
+            color: var(--highlight-color);
+        }
+
+        .copyright {
+            margin-top: 2rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        /* Efeito de partículas estelares */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background-color: var(--star-color);
+            border-radius: 50%;
+            animation: twinkle 5s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 0.2;
+                transform: scale(0.8);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+        }
+
+        .nav-button {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-button:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul {
+                gap: 1rem;
+                margin-top: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .step-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .controls {
+                justify-content: center;
+            }
+
+            .indice-params {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .param-card {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Efeito de estrelas -->
+    <div class="stars" id="stars"></div>
+
+    <header>
+        <div class="nav-container">
+            <div class="logo">Prisma Arena - Aula 7</div>
+            <nav>
+                <ul>
+                    <li><a href="#inicio">Início</a></li>
+                    <li><a href="#recursos">Recursos</a></li>
+                    <li><a href="#demo">Demonstração</a></li>
+                    <li><a href="#tutorial">Tutorial</a></li>
+                    <li><a href="index.html">Voltar ao Menu</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero" id="inicio">
+        <h1>Travamento de Fórmula na Era Estelar</h1>
+        <p>Nesta aula, você dominará técnicas avançadas para controlar as referências em suas fórmulas. Aprenda a função ÍNDICE e os métodos de travamento de fórmulas para criar cálculos dinâmicos e precisos, mesmo quando copiados para outras células.</p>
+        <button class="cta-button">Começar a Explorar</button>
+    </section>
+
+    <section class="content-section" id="recursos">
+        <h2 class="section-title">Recursos Estelares</h2>
+        <div class="grid-container">
+            <div class="feature-card">
+                <div class="feature-icon">🔒</div>
+                <h3>Referências Absolutas</h3>
+                <p>Domine o uso de referências absolutas ($) para manter constantes específicas partes das referências de células quando copiadas para outras localizações.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔄</div>
+                <h3>Referências Mistas</h3>
+                <p>Aprenda a criar referências mistas combinando elementos fixos e relativos para criar fórmulas versáteis que se adaptam parcialmente quando copiadas.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Função ÍNDICE</h3>
+                <p>Explore a poderosa função ÍNDICE para recuperar valores de posições específicas em tabelas ou intervalos, criando referências dinâmicas e flexíveis.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔍</div>
+                <h3>Função CORRESP</h3>
+                <p>Descubra como combinar ÍNDICE com CORRESP para criar pesquisas dinâmicas em duas dimensões, localizando dados exatamente onde você precisa.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔗</div>
+                <h3>Referências Entre Planilhas</h3>
+                <p>Aprenda a travar referências entre diferentes planilhas e arquivos, permitindo criar sistemas integrados de dados com maior organização.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📈</div>
+                <h3>Aplicações Práticas</h3>
+                <p>Veja exemplos práticos de como aplicar técnicas de travamento em situações reais, como relatórios dinâmicos, painéis e análises comparativas.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="demo-section" id="demo">
+        <h2 class="section-title">Demonstração Interativa</h2>
+        <p>Experimente o travamento de fórmulas e a função ÍNDICE nesta demonstração interativa. Construa fórmulas com diferentes tipos de referências e observe como elas se comportam quando copiadas.</p>
+        
+        <div class="formula-builder">
+            <div class="formula-row">
+                <div class="formula-label">Célula de Referência:</div>
+                <div class="reference-type">
+                    <label class="reference-option">
+                        <input type="radio" name="ref-type" value="relativa" checked class="reference-radio">
+                        <span>Relativa (B2)</span>
+                    </label>
+                    <label class="reference-option">
+                        <input type="radio" name="ref-type" value="absoluta" class="reference-radio">
+                        <span>Absoluta ($B$2)</span>
+                    </label>
+                    <label class="reference-option">
+                        <input type="radio" name="ref-type" value="mista-col" class="reference-radio">
+                        <span>Mista ($B2)</span>
+                    </label>
+                    <label class="reference-option">
+                        <input type="radio" name="ref-type" value="mista-lin" class="reference-radio">
+                        <span>Mista (B$2)</span>
+                    </label>
+                </div>
+            </div>
+            
+            <div class="formula-row">
+                <div class="formula-label">Operação:</div>
+                <select id="operation" class="formula-input" style="flex-grow: 0; width: 150px;">
+                    <option value="*">Multiplicar (*)</option>
+                    <option value="+">Somar (+)</option>
+                    <option value="-">Subtrair (-)</option>
+                    <option value="/">Dividir (/)</option>
+                </select>
+                <input type="text" id="operand" class="formula-input" placeholder="Valor ou referência" value="2">
+            </div>
+            
+            <div class="formula-preview" id="formula-preview">
+                =B2 * 2
+            </div>
+            
+            <div class="controls">
+                <button class="control-button" id="apply-formula">Aplicar Fórmula</button>
+                <button class="control-button" id="copy-down">Copiar para Baixo</button>
+                <button class="control-button" id="copy-right">Copiar para Direita</button>
+                <button class="control-button" id="reset-table">Resetar Tabela</button>
+            </div>
+        </div>
+        
+        <div class="spreadsheet-demo">
+            <table id="data-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>A</th>
+                        <th>B</th>
+                        <th>C</th>
+                        <th>D</th>
+                        <th>E</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Produto</td>
+                        <td>Quantidade</td>
+                        <td>Preço</td>
+                        <td>Fórmula →</td>
+                        <td>Resultado</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Processador Quântico</td>
+                        <td>5</td>
+                        <td>1200</td>
+                        <td class="selected-cell"></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Módulo Neural</td>
+                        <td>8</td>
+                        <td>950</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Visor Holográfico</td>
+                        <td>3</td>
+                        <td>1500</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>Console Estelar</td>
+                        <td>10</td>
+                        <td>2000</td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="indice-formula">
+            <div class="indice-title">Função ÍNDICE</div>
+            <div class="indice-syntax">=ÍNDICE(matriz; núm_linha; [núm_coluna])</div>
+            <p>A função ÍNDICE retorna um valor ou a referência a um valor dentro de uma tabela ou intervalo. É especialmente útil para criar referências dinâmicas combinada com outras funções como CORRESP.</p>
+            
+            <div class="indice-params">
+                <div class="param-card">
+                    <div class="param-name">matriz</div>
+                    <div class="param-desc">Um intervalo de células ou uma constante de matriz</div>
+                </div>
+                <div class="param-card">
+                    <div class="param-name">núm_linha</div>
+                    <div class="param-desc">Número da linha na matriz da qual retornar uma referência</div>
+                </div>
+                <div class="param-card">
+                    <div class="param-name">núm_coluna</div>
+                    <div class="param-desc">[Opcional] Número da coluna na matriz da qual retornar uma referência</div>
+                </div>
+            </div>
+            
+            <button class="formula-button" style="margin-top: 1.5rem;" id="try-indice">Tentar Função ÍNDICE</button>
+        </div>
+        
+        <div class="reference-examples">
+            <div class="reference-card">
+                <div class="reference-title">Relativa</div>
+                <div class="reference-code">B2</div>
+                <div class="reference-desc">Referência que muda ao copiar a fórmula para outras células.</div>
+            </div>
+            <div class="reference-card">
+                <div class="reference-title">Absoluta</div>
+                <div class="reference-code">$B$2</div>
+                <div class="reference-desc">Mantém a coluna B e linha 2 fixas quando copiada.</div>
+            </div>
+            <div class="reference-card">
+                <div class="reference-title">Mista (Coluna Fixa)</div>
+                <div class="reference-code">$B2</div>
+                <div class="reference-desc">Mantém a coluna B fixa, mas a linha pode mudar ao copiar.</div>
+            </div>
+            <div class="reference-card">
+                <div class="reference-title">Mista (Linha Fixa)</div>
+                <div class="reference-code">B$2</div>
+                <div class="reference-desc">Mantém a linha 2 fixa, mas a coluna pode mudar ao copiar.</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="content-section" id="tutorial">
+        <h2 class="section-title">Tutorial Passo a Passo</h2>
+        
+        <div class="tutorial-steps">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>Entendendo Referências no Excel</h3>
+                    <p>O Excel utiliza três tipos principais de referências de células: <span class="keyboard-shortcut">Relativas</span>, <span class="keyboard-shortcut">Absolutas</span> e <span class="keyboard-shortcut">Mistas</span>. Por padrão, quando você insere uma referência como B2, o Excel a trata como relativa. Isso significa que, ao copiar a fórmula para outra célula, a referência se ajustará com base na posição da nova célula. Por exemplo, se a célula D2 contém a fórmula =B2+C2 e você a copiar para D3, a fórmula se ajustará para =B3+C3. Este comportamento é extremamente útil para aplicar a mesma lógica de cálculo a diferentes linhas ou colunas de dados, mas às vezes você precisa que certas referências permaneçam fixas quando a fórmula é copiada.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Referências Absolutas</h3>
+                    <p>Uma <span class="keyboard-shortcut">referência absoluta</span> é criada adicionando o símbolo $ antes da letra da coluna e do número da linha (ex: $B$2). Quando você copia uma fórmula contendo referências absolutas, elas permanecem exatamente iguais, apontando sempre para a mesma célula. Isso é particularmente útil quando você precisa referenciar uma constante, como uma taxa de imposto ou um valor de conversão, que deve ser usada em vários cálculos. Para alternar rapidamente entre os tipos de referência, selecione a referência na barra de fórmulas e pressione <span class="keyboard-shortcut">F4</span> repetidamente. Cada pressionamento de F4 alterna entre referência relativa (B2), absolutamente absoluta ($B$2), mista com coluna absoluta ($B2) e mista com linha absoluta (B$2).</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Referências Mistas</h3>
+                    <p>As <span class="keyboard-shortcut">referências mistas</span> combinam elementos relativos e absolutos. Existem dois tipos: com coluna fixa ($B2) e com linha fixa (B$2). Em uma referência com coluna fixa ($B2), a coluna B permanece constante quando a fórmula é copiada, mas a linha se ajusta. Isso é útil, por exemplo, quando você está construindo uma tabela de consulta e precisa referir-se sempre à mesma coluna, mas a diferentes linhas. Em uma referência com linha fixa (B$2), a linha 2 permanece constante, mas a coluna se ajusta. Isso é útil para referenciar valores de cabeçalho em uma tabela. Por exemplo, em uma tabela de multiplicação, você poderia usar referências com linha fixa para os multiplicadores no cabeçalho e referências com coluna fixa para os multiplicadores na primeira coluna.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h3>Função ÍNDICE</h3>
+                    <p>A função <span class="keyboard-shortcut">ÍNDICE(matriz; núm_linha; [núm_coluna])</span> é uma ferramenta poderosa para recuperar valores ou referências de um intervalo específico. Ela retorna o valor na posição indicada dentro da matriz, com base nos números de linha e coluna fornecidos. Por exemplo, <span class="keyboard-shortcut">=ÍNDICE(A1:D10; 3; 2)</span> retorna o valor na terceira linha e segunda coluna do intervalo A1:D10 (que seria B3). A função ÍNDICE é extremamente versátil, especialmente quando os parâmetros núm_linha e núm_coluna são dinâmicos, baseados em outras células ou cálculos. Por exemplo, <span class="keyboard-shortcut">=ÍNDICE(A1:D10; LINHA()-1; 2)</span> retornaria valores da segunda coluna do intervalo, com a linha determinada pela posição da fórmula na planilha.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                    <h3>Combinando ÍNDICE e CORRESP</h3>
+                    <p>Uma das combinações mais poderosas no Excel é <span class="keyboard-shortcut">ÍNDICE</span> com <span class="keyboard-shortcut">CORRESP</span>. A função CORRESP(valor_procurado; matriz_procurada; [tipo_correspondência]) localiza a posição de um valor dentro de um intervalo. Quando combinada com ÍNDICE, você pode criar pesquisas dinâmicas em duas dimensões. Por exemplo, <span class="keyboard-shortcut">=ÍNDICE(A1:D10; CORRESP("Produto X"; A1:A10; 0); CORRESP("Vendas"; A1:D1; 0))</span> encontraria o valor na interseção da linha contendo "Produto X" e da coluna contendo "Vendas". Esta combinação é a base para muitas soluções avançadas no Excel, como tabelas de consulta dinâmicas e painéis interativos. Ela oferece muito mais flexibilidade que PROCV ou PROCH, permitindo pesquisas bidirecionais e ignorando limitações como a necessidade de ordenar dados.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">6</div>
+                <div class="step-content">
+                    <h3>Aplicações Práticas e Dicas</h3>
+                    <p>O domínio das referências e da função ÍNDICE abre um mundo de possibilidades no Excel. Alguns casos de uso comuns incluem: <span class="keyboard-shortcut">Tabelas de consulta bidirecionais</span> (como planos de preço com variáveis em linhas e colunas); <span class="keyboard-shortcut">Painéis dinâmicos</span> que atualizam com base em seletores; <span class="keyboard-shortcut">Análises comparativas</span> que mantêm referências a valores-base. Dicas importantes: use nomes definidos para tornar as fórmulas mais legíveis e manuteníveis; considere combinar ÍNDICE com funções como INDIRETO para criar referências ultra-dinâmicas; utilize a técnica de "fórmulas empilhadas" criando cálculos intermediários em células separadas para tornar as fórmulas complexas mais gerenciáveis; e sempre verifique como suas fórmulas se comportam quando copiadas, especialmente em modelos que outras pessoas usarão.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="navigation-buttons">
+            <button class="nav-button previous">← Aula Anterior</button>
+            <button class="nav-button next">Próxima Aula →</button>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">Prisma Arena - Aula 7</div>
+            <p>Explorando o universo do Excel com tecnologia estelar</p>
+            <div class="footer-nav">
+                <a href="#inicio">Início</a>
+                <a href="#recursos">Recursos</a>
+                <a href="#demo">Demonstração</a>
+                <a href="#tutorial">Tutorial</a>
+                <a href="index.html">Menu Principal</a>
+            </div>
+            <p class="copyright">© 2025 Prisma Arena. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Criar efeito de estrelas
+        document.addEventListener('DOMContentLoaded', function() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 100;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                star.style.width = `${Math.random() * 3 + 1}px`;
+                star.style.height = star.style.width;
+                starsContainer.appendChild(star);
+            }
+
+            // Variáveis para a demonstração de fórmula
+            const table = document.getElementById('data-table');
+            const formulaPreview = document.getElementById('formula-preview');
+            const referenceTypeRadios = document.querySelectorAll('input[name="ref-type"]');
+            const operationSelect = document.getElementById('operation');
+            const operandInput = document.getElementById('operand');
+            const selectedCell = table.rows[2].cells[4]; // D2 é a célula inicial selecionada
+            
+            // Atualizar a pré-visualização da fórmula baseada nas seleções
+            function updateFormulaPreview() {
+                let referenceType = document.querySelector('input[name="ref-type"]:checked').value;
+                let operation = operationSelect.value;
+                let operand = operandInput.value;
+                let cellRef;
+                
+                switch (referenceType) {
+                    case 'relativa':
+                        cellRef = 'B2';
+                        break;
+                    case 'absoluta':
+                        cellRef = '$B$2';
+                        break;
+                    case 'mista-col':
+                        cellRef = '$B2';
+                        break;
+                    case 'mista-lin':
+                        cellRef = 'B$2';
+                        break;
+                }
+                
+                formulaPreview.textContent = `=${cellRef} ${operation} ${operand}`;
+            }
+            
+            // Event listeners para atualizar a pré-visualização
+            referenceTypeRadios.forEach(radio => {
+                radio.addEventListener('change', updateFormulaPreview);
+            });
+            
+            operationSelect.addEventListener('change', updateFormulaPreview);
+            operandInput.addEventListener('input', updateFormulaPreview);
+            
+            // Aplicar a fórmula à célula selecionada
+            document.getElementById('apply-formula').addEventListener('click', function() {
+                selectedCell.textContent = formulaPreview.textContent;
+                
+                // Avaliar o resultado e mostrar na coluna E
+                try {
+                    // Simplificação para demonstração - na vida real, precisaríamos de um parser de fórmula
+                    const row = 2; // Estamos na linha 2
+                    let referenceType = document.querySelector('input[name="ref-type"]:checked').value;
+                    let operation = operationSelect.value;
+                    let operand = parseFloat(operandInput.value);
+                    let cellValue = parseFloat(table.rows[row].cells[2].textContent); // Valor em B2
+                    
+                    let result;
+                    switch (operation) {
+                        case '*':
+                            result = cellValue * operand;
+                            break;
+                        case '+':
+                            result = cellValue + operand;
+                            break;
+                        case '-':
+                            result = cellValue - operand;
+                            break;
+                        case '/':
+                            result = cellValue / operand;
+                            break;
+                    }
+                    
+                    table.rows[row].cells[5].textContent = result; // Mostrar em E2
+                    
+                } catch (error) {
+                    table.rows[2].cells[5].textContent = '#ERRO';
+                }
+                
+                alert('Fórmula aplicada! Agora você pode copiar para baixo ou para a direita para ver o comportamento dos diferentes tipos de referência.');
+            });
+            
+            // Copiar fórmula para baixo
+            document.getElementById('copy-down').addEventListener('click', function() {
+                if (!selectedCell.textContent) {
+                    alert('Aplique uma fórmula primeiro!');
+                    return;
+                }
+                
+                for (let i = 3; i <= 5; i++) { // Copiar para linhas 3, 4 e 5
+                    const formula = selectedCell.textContent;
+                    const targetCell = table.rows[i].cells[4]; // Coluna D
+                    
+                    // Aplicar a fórmula ajustada para a linha
+                    let adjustedFormula = formula;
+                    let referenceType = document.querySelector('input[name="ref-type"]:checked').value;
+                    
+                    if (referenceType === 'relativa' || referenceType === 'mista-col') {
+                        // Ajustar o número da linha para referências relativas ou mistas com coluna fixa
+                        adjustedFormula = formula.replace(/B2/g, `B${i}`);
+                    } else if (referenceType === 'mista-lin') {
+                        // Manter a linha fixa, mas permitir que a coluna mude se necessário
+                        // Neste caso simples, não há mudança de coluna, então formula permanece a mesma
+                    }
+                    // Se for absoluta ($B$2), não fazemos ajustes
+                    
+                    targetCell.textContent = adjustedFormula;
+                    
+                    // Calcular e mostrar o resultado
+                    try {
+                        let operation = operationSelect.value;
+                        let operand = parseFloat(operandInput.value);
+                        let cellValue;
+                        
+                        if (referenceType === 'relativa' || referenceType === 'mista-col') {
+                            cellValue = parseFloat(table.rows[i].cells[2].textContent); // Valor em Bi
+                        } else {
+                            cellValue = parseFloat(table.rows[2].cells[2].textContent); // Sempre o valor em B2
+                        }
+                        
+                        let result;
+                        switch (operation) {
+                            case '*':
+                                result = cellValue * operand;
+                                break;
+                            case '+':
+                                result = cellValue + operand;
+                                break;
+                            case '-':
+                                result = cellValue - operand;
+                                break;
+                            case '/':
+                                result = cellValue / operand;
+                                break;
+                        }
+                        
+                        table.rows[i].cells[5].textContent = result; // Mostrar em Ei
+                        
+                    } catch (error) {
+                        table.rows[i].cells[5].textContent = '#ERRO';
+                    }
+                }
+                
+                alert('Fórmula copiada para baixo! Observe como os diferentes tipos de referência afetam o resultado.');
+            });
+            
+            // Copiar fórmula para a direita (simplificado para demonstração)
+            document.getElementById('copy-right').addEventListener('click', function() {
+                alert('Em um caso real, poderíamos copiar a fórmula para colunas adicionais e demonstrar como as referências de coluna se comportam. Esta funcionalidade está simplificada nesta demonstração.');
+            });
+            
+            // Resetar a tabela
+            document.getElementById('reset-table').addEventListener('click', function() {
+                // Limpar células de fórmula e resultado
+                for (let i = 2; i <= 5; i++) {
+                    table.rows[i].cells[4].textContent = ''; // Coluna D (fórmula)
+                    table.rows[i].cells[5].textContent = ''; // Coluna E (resultado)
+                }
+                
+                // Restaurar seleção original
+                selectedCell.classList.add('selected-cell');
+                
+                alert('Tabela resetada. Você pode aplicar uma nova fórmula.');
+            });
+            
+            // Demo da função ÍNDICE
+            document.getElementById('try-indice').addEventListener('click', function() {
+                // Demonstração simples da função ÍNDICE
+                const result = prompt('Vamos testar a função ÍNDICE!\nDigite um número de linha (2-5) para recuperar o produto dessa linha:');
+                
+                if (result && !isNaN(result)) {
+                    const row = parseInt(result);
+                    if (row >= 2 && row <= 5) {
+                        const value = table.rows[row].cells[1].textContent;
+                        alert(`ÍNDICE(A1:A5; ${row}; 1) = ${value}\n\nA função ÍNDICE retornou o produto da linha ${row}.`);
+                    } else {
+                        alert('Por favor, digite um número entre 2 e 5.');
+                    }
+                }
+            });
+            
+            // Manipulador para os botões de navegação
+            document.querySelector('.previous').addEventListener('click', function() {
+                window.location.href = 'aula6_funcoes_texto_data.html';
+            });
+            
+            document.querySelector('.next').addEventListener('click', function() {
+                window.location.href = 'aula8_manipulacao_dados.html';
+            });
+            
+            // Adicionar smooth scroll para navegação
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+            
+            // Animação para o botão CTA
+            document.querySelector('.cta-button').addEventListener('click', function() {
+                document.querySelector('#recursos').scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

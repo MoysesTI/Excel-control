@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prisma Arena - Aula 1: Introdução ao Excel</title>
+    <style>
+        :root {
+            --primary-color: #2e0259;
+            --secondary-color: #5727a3;
+            --accent-color: #9152e0;
+            --highlight-color: #bf7af0;
+            --star-color: #f5c6ff;
+            --text-color: #ffffff;
+            --dark-bg: #0a0118;
+            --cell-border: #5727a3;
+            --grid-bg: rgba(15, 3, 40, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(145, 82, 224, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 70% 60%, rgba(191, 122, 240, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 40% 80%, rgba(245, 198, 255, 0.08) 0%, transparent 20%);
+            overflow-x: hidden;
+        }
+
+        header {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(145, 82, 224, 0.5);
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--star-color), var(--highlight-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(245, 198, 255, 0.3);
+            display: flex;
+            align-items: center;
+        }
+
+        .logo::before {
+            content: "✧";
+            margin-right: 0.5rem;
+            font-size: 1.8rem;
+            -webkit-text-fill-color: var(--star-color);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--highlight-color);
+            transition: width 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--highlight-color);
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4rem 1rem;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, var(--accent-color), var(--highlight-color), var(--star-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            max-width: 700px;
+            margin-bottom: 2.5rem;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #d8c3e9;
+        }
+
+        .cta-button {
+            background: linear-gradient(45deg, var(--accent-color), var(--highlight-color));
+            color: var(--text-color);
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(145, 82, 224, 0.5);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(145, 82, 224, 0.7);
+        }
+
+        .content-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 1rem;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 2.5rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: "";
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(to right, var(--accent-color), var(--highlight-color));
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .feature-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(145, 82, 224, 0.1), rgba(191, 122, 240, 0.1));
+            z-index: -1;
+            transform: translateY(100%);
+            transition: transform 0.5s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(145, 82, 224, 0.3);
+        }
+
+        .feature-card:hover::before {
+            transform: translateY(0);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--highlight-color);
+        }
+
+        .feature-card h3 {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            color: var(--highlight-color);
+        }
+
+        .feature-card p {
+            color: #d8c3e9;
+            line-height: 1.5;
+        }
+
+        .demo-section {
+            background: var(--grid-bg);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 4rem auto;
+            max-width: 1000px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--secondary-color);
+        }
+
+        .interface-demo {
+            margin-top: 2rem;
+            background-color: rgba(10, 1, 24, 0.7);
+            border-radius: 8px;
+            border: 1px solid var(--secondary-color);
+            overflow: hidden;
+        }
+
+        .excel-toolbar {
+            background: linear-gradient(to bottom, #3a3a3a, #2a2a2a);
+            padding: 10px;
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+        }
+
+        .toolbar-section {
+            display: flex;
+            gap: 5px;
+            padding: 0 5px;
+            border-right: 1px solid #444;
+        }
+
+        .toolbar-button {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .toolbar-button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .excel-header {
+            background-color: #121212;
+            padding: 8px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sheet-tabs {
+            background-color: #1a1a1a;
+            padding: 5px 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .sheet-tab {
+            padding: 5px 15px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 3px 3px 0 0;
+            cursor: pointer;
+        }
+
+        .sheet-tab.active {
+            background-color: rgba(145, 82, 224, 0.3);
+        }
+
+        .spreadsheet-grid {
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 800px;
+        }
+
+        th, td {
+            border: 1px solid var(--cell-border);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: rgba(87, 39, 163, 0.1);
+        }
+
+        tr:hover {
+            background-color: rgba(145, 82, 224, 0.2);
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .control-button {
+            background: var(--primary-color);
+            color: var(--text-color);
+            border: 1px solid var(--accent-color);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .selected-cell {
+            background-color: rgba(191, 122, 240, 0.3) !important;
+        }
+
+        .tutorial-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .step-card {
+            background: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 10px;
+            padding: 2rem;
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .step-content h3 {
+            margin-bottom: 1rem;
+            color: var(--highlight-color);
+        }
+
+        .step-content p {
+            color: #d8c3e9;
+            line-height: 1.6;
+        }
+
+        .keyboard-shortcut {
+            display: inline-block;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            margin: 0 0.2rem;
+        }
+
+        footer {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 3rem 1rem;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--star-color), var(--highlight-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+
+        .footer-nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .footer-nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-nav a:hover {
+            color: var(--highlight-color);
+        }
+
+        .copyright {
+            margin-top: 2rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        /* Efeito de partículas estelares */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background-color: var(--star-color);
+            border-radius: 50%;
+            animation: twinkle 5s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 0.2;
+                transform: scale(0.8);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+        }
+
+        .nav-button {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-button:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .previous {
+            visibility: hidden;
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul {
+                gap: 1rem;
+                margin-top: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .step-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .controls {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Efeito de estrelas -->
+    <div class="stars" id="stars"></div>
+
+    <header>
+        <div class="nav-container">
+            <div class="logo">Prisma Arena - Aula 1</div>
+            <nav>
+                <ul>
+                    <li><a href="#inicio">Início</a></li>
+                    <li><a href="#recursos">Recursos</a></li>
+                    <li><a href="#demo">Demonstração</a></li>
+                    <li><a href="#tutorial">Tutorial</a></li>
+                    <li><a href="index.html">Voltar ao Menu</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero" id="inicio">
+        <h1>Introdução ao Excel na Era Estelar</h1>
+        <p>Bem-vindo à sua primeira aula na Prisma Arena Excel. Aqui você aprenderá sobre a interface do Excel, navegação básica, criação e salvamento de planilhas. Domine as técnicas iniciais de formatação, incluindo fontes, cores, alinhamento, formatação de coluna, mesclagem e quebra de texto.</p>
+        <button class="cta-button">Começar a Jornada</button>
+    </section>
+
+    <section class="content-section" id="recursos">
+        <h2 class="section-title">Recursos Estelares</h2>
+        <div class="grid-container">
+            <div class="feature-card">
+                <div class="feature-icon">🚀</div>
+                <h3>Interface do Excel</h3>
+                <p>Conheça a estrutura principal da interface do Excel, incluindo faixa de opções, barra de fórmulas, células, planilhas e os componentes essenciais para iniciar sua jornada.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Navegação Eficiente</h3>
+                <p>Aprenda técnicas de navegação rápida pela planilha, como atalhos de teclado, seleção de células, linhas e colunas para otimizar seu fluxo de trabalho.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">💾</div>
+                <h3>Criar e Salvar</h3>
+                <p>Domine os diferentes formatos de arquivos, métodos de salvamento e boas práticas para organização e compartilhamento de planilhas.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎨</div>
+                <h3>Formatação Básica</h3>
+                <p>Explore as opções de formatação para texto, fontes, cores e bordas que transformarão suas planilhas em documentos profissionais e visualmente agradáveis.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📏</div>
+                <h3>Alinhamento e Colunas</h3>
+                <p>Descubra como ajustar o alinhamento de texto, dimensionar colunas e linhas e organizar seus dados de forma clara e estruturada.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔄</div>
+                <h3>Mesclar e Quebrar</h3>
+                <p>Aprenda técnicas para mesclar células para títulos e cabeçalhos, além de dominar a quebra automática de texto para melhor visualização dos dados.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="demo-section" id="demo">
+        <h2 class="section-title">Ambiente de Trabalho</h2>
+        <p>Explore a interface do Excel e familiarize-se com os principais elementos. Use os controles abaixo para interagir com diferentes aspectos da interface.</p>
+        
+        <div class="controls">
+            <button class="control-button" id="interface-btn">Interface Básica</button>
+            <button class="control-button" id="ribbon-btn">Faixa de Opções</button>
+            <button class="control-button" id="navigation-btn">Navegação</button>
+            <button class="control-button" id="formatting-btn">Formatação</button>
+            <button class="control-button" id="resetar-btn">Resetar</button>
+        </div>
+        
+        <div class="interface-demo">
+            <div class="excel-header">
+                <span>Planilha1.xlsx - Excel</span>
+                <span>Prisma Arena</span>
+            </div>
+            <div class="excel-toolbar">
+                <div class="toolbar-section">
+                    <button class="toolbar-button">B</button>
+                    <button class="toolbar-button">I</button>
+                    <button class="toolbar-button">U</button>
+                </div>
+                <div class="toolbar-section">
+                    <button class="toolbar-button">A</button>
+                    <button class="toolbar-button">#</button>
+                    <button class="toolbar-button">$</button>
+                </div>
+                <div class="toolbar-section">
+                    <button class="toolbar-button">⧠</button>
+                    <button class="toolbar-button">◯</button>
+                    <button class="toolbar-button">△</button>
+                </div>
+            </div>
+            <div class="spreadsheet-grid">
+                <table id="data-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>A</th>
+                            <th>B</th>
+                            <th>C</th>
+                            <th>D</th>
+                            <th>E</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td></td>
+                            <td>Dados da Empresa</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td></td>
+                            <td>Produto</td>
+                            <td>Quantidade</td>
+                            <td>Preço</td>
+                            <td>Total</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td></td>
+                            <td>Produto A</td>
+                            <td>10</td>
+                            <td>R$ 25,00</td>
+                            <td>R$ 250,00</td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td></td>
+                            <td>Produto B</td>
+                            <td>5</td>
+                            <td>R$ 30,00</td>
+                            <td>R$ 150,00</td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td></td>
+                            <td>Produto C</td>
+                            <td>8</td>
+                            <td>R$ 15,00</td>
+                            <td>R$ 120,00</td>
+                        </tr>
+                        <tr>
+                            <td>8</td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="sheet-tabs">
+                <div class="sheet-tab active">Planilha1</div>
+                <div class="sheet-tab">Planilha2</div>
+                <div class="sheet-tab">Planilha3</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="content-section" id="tutorial">
+        <h2 class="section-title">Tutorial Passo a Passo</h2>
+        
+        <div class="tutorial-steps">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>Conhecendo a Interface</h3>
+                    <p>O Excel possui uma interface baseada em faixas de opções. No topo, encontramos a <span class="keyboard-shortcut">Barra de Título</span> com o nome do arquivo, seguida pela <span class="keyboard-shortcut">Faixa de Opções</span> (Ribbon) com guias temáticas. Abaixo está a <span class="keyboard-shortcut">Barra de Fórmulas</span> onde editamos o conteúdo das células. A área principal é a <span class="keyboard-shortcut">Planilha</span>, organizada em células identificadas por coordenadas de coluna (letras) e linha (números). Na parte inferior, as <span class="keyboard-shortcut">Guias de Planilha</span> permitem alternar entre diferentes planilhas do mesmo arquivo.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Navegação Básica</h3>
+                    <p>Existem várias formas de navegar pelo Excel: usando o mouse para clicar nas células desejadas, as teclas de seta para mover-se entre células adjacentes, ou atalhos como <span class="keyboard-shortcut">Ctrl+Home</span> para ir ao início da planilha e <span class="keyboard-shortcut">Ctrl+End</span> para ir à última célula com dados. Para selecionar um intervalo, clique e arraste o mouse ou use <span class="keyboard-shortcut">Shift+Setas</span>. Para selecionar células não adjacentes, use <span class="keyboard-shortcut">Ctrl+Clique</span>. Para selecionar uma coluna inteira, clique na letra da coluna; para uma linha inteira, clique no número da linha.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Criando e Salvando Planilhas</h3>
+                    <p>Para criar uma nova planilha, use <span class="keyboard-shortcut">Ctrl+N</span> ou clique em Arquivo > Novo. Para salvar, use <span class="keyboard-shortcut">Ctrl+S</span> ou clique em Arquivo > Salvar. Na primeira vez, você precisará escolher um local e nome para o arquivo. O Excel oferece vários formatos: <span class="keyboard-shortcut">.xlsx</span> (padrão), <span class="keyboard-shortcut">.xlsm</span> (com macros), <span class="keyboard-shortcut">.csv</span> (valores separados por vírgula), entre outros. Para garantir compatibilidade, é recomendável usar o formato .xlsx para uso geral. Salve seu trabalho frequentemente para evitar perdas de dados!</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h3>Formatação de Texto e Células</h3>
+                    <p>A formatação de texto no Excel é semelhante a processadores de texto. Selecione as células e use a faixa de opções "Página Inicial" para alterar a fonte, tamanho, cor, estilo (negrito <span class="keyboard-shortcut">Ctrl+N</span>, itálico <span class="keyboard-shortcut">Ctrl+I</span>, sublinhado <span class="keyboard-shortcut">Ctrl+S</span>). Para adicionar bordas e cores de preenchimento, use os botões na seção "Fonte". Você pode aplicar formatação condicional (Página Inicial > Formatação Condicional) para destacar automaticamente células que atendam a critérios específicos, como valores acima da média ou datas vencidas.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                    <h3>Alinhamento e Formatação de Colunas</h3>
+                    <p>Para ajustar o alinhamento de texto, use a seção "Alinhamento" na guia Página Inicial. As opções incluem alinhamento horizontal (esquerda, centro, direita), vertical (superior, central, inferior) e orientação do texto. Para ajustar a largura de uma coluna, posicione o cursor entre os cabeçalhos de coluna e arraste, ou dê um duplo clique para ajuste automático à largura do conteúdo. Use <span class="keyboard-shortcut">Alt+Enter</span> dentro de uma célula para criar quebras de linha manuais. Para formatar colunas numéricas, use a seção "Número" para escolher formatos como moeda, porcentagem, data, etc.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">6</div>
+                <div class="step-content">
+                    <h3>Mesclagem e Quebra de Texto</h3>
+                    <p>A mesclagem de células é útil para criar títulos ou cabeçalhos que ocupam várias colunas. Selecione as células a serem mescladas e clique em "Mesclar e Centralizar" na guia Página Inicial. Observe que ao mesclar células, apenas o conteúdo da célula superior esquerda será mantido. Para desfazer a mesclagem, selecione a célula mesclada e clique novamente em "Mesclar e Centralizar". Para aplicar quebra automática de texto, selecione as células e marque a opção "Quebrar Texto Automaticamente" na seção Alinhamento. Isso permite que textos longos sejam exibidos em várias linhas dentro da mesma célula, aumentando a altura da linha conforme necessário.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="navigation-buttons">
+            <button class="nav-button previous">← Aula Anterior</button>
+            <button class="nav-button next">Próxima Aula →</button>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">Prisma Arena - Aula 1</div>
+            <p>Explorando o universo do Excel com tecnologia estelar</p>
+            <div class="footer-nav">
+                <a href="#inicio">Início</a>
+                <a href="#recursos">Recursos</a>
+                <a href="#demo">Demonstração</a>
+                <a href="#tutorial">Tutorial</a>
+                <a href="index.html">Menu Principal</a>
+            </div>
+            <p class="copyright">© 2025 Prisma Arena. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Criar efeito de estrelas
+        document.addEventListener('DOMContentLoaded', function() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 100;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                star.style.width = `${Math.random() * 3 + 1}px`;
+                star.style.height = star.style.width;
+                starsContainer.appendChild(star);
+            }
+
+            // Funcionalidade de seleção de células
+            const table = document.getElementById('data-table');
+            let selectedCell = null;
+            
+            // Adicionando event listeners para as células da tabela
+            for (let i = 1; i < table.rows.length; i++) {
+                for (let j = 1; j < table.rows[i].cells.length; j++) {
+                    const cell = table.rows[i].cells[j];
+                    
+                    cell.addEventListener('click', function() {
+                        // Remover a classe da célula anteriormente selecionada
+                        if (selectedCell) {
+                            selectedCell.classList.remove('selected-cell');
+                        }
+                        
+                        // Adicionar a classe à nova célula selecionada
+                        this.classList.add('selected-cell');
+                        selectedCell = this;
+                    });
+                }
+            }
+            
+            // Manipuladores de eventos para os botões de funções
+            document.getElementById('interface-btn').addEventListener('click', function() {
+                alert('Interface Básica do Excel: Observe a faixa de opções no topo, a área de células no centro e as guias de planilha na parte inferior. Esta é a estrutura principal que você usará para criar e editar planilhas.');
+            });
+            
+            document.getElementById('ribbon-btn').addEventListener('click', function() {
+                const toolbar = document.querySelector('.excel-toolbar');
+                toolbar.style.backgroundColor = 'rgba(145, 82, 224, 0.3)';
+                setTimeout(() => {
+                    toolbar.style.backgroundColor = '';
+                }, 1500);
+                alert('Faixa de Opções (Ribbon): Contém comandos organizados em guias temáticas como Página Inicial, Inserir, Layout da Página, etc. Cada guia tem grupos de comandos relacionados para facilitar o acesso às funcionalidades.');
+            });
+            
+            document.getElementById('navigation-btn').addEventListener('click', function() {
+                // Destacar células de coordenadas
+                const headerRow = table.rows[0];
+                const firstCol = document.querySelectorAll('tbody tr td:first-child');
+                
+                for (let i = 0; i < headerRow.cells.length; i++) {
+                    headerRow.cells[i].style.backgroundColor = 'rgba(191, 122, 240, 0.3)';
+                }
+                
+                for (let i = 0; i < firstCol.length; i++) {
+                    firstCol[i].style.backgroundColor = 'rgba(191, 122, 240, 0.3)';
+                }
+                
+                setTimeout(() => {
+                    for (let i = 0; i < headerRow.cells.length; i++) {
+                        headerRow.cells[i].style.backgroundColor = '';
+                    }
+                    
+                    for (let i = 0; i < firstCol.length; i++) {
+                        firstCol[i].style.backgroundColor = '';
+                    }
+                }, 1500);
+                
+                alert('Navegação: As colunas são identificadas por letras (A, B, C...) e as linhas por números (1, 2, 3...). Cada célula tem uma coordenada única como A1, B5, etc. Use as teclas de seta para navegar ou clique diretamente na célula desejada.');
+            });
+            
+            document.getElementById('formatting-btn').addEventListener('click', function() {
+                // Aplicar formatação à tabela de exemplo
+                const cellsToFormat = table.rows[4].cells;
+                for (let i = 2; i < cellsToFormat.length; i++) {
+                    cellsToFormat[i].style.fontWeight = 'bold';
+                    cellsToFormat[i].style.color = '#bf7af0';
+                }
+                
+                // Mesclar células de título
+                const titleCell = table.rows[2].cells[2];
+                titleCell.style.fontWeight = 'bold';
+                titleCell.style.fontSize = '1.2em';
+                titleCell.style.color = '#f5c6ff';
+                titleCell.colSpan = 3;
+                table.rows[2].cells[3].style.display = 'none';
+                table.rows[2].cells[4].style.display = 'none';
+                
+                alert('Formatação Aplicada: Observe como alteramos o estilo do texto (negrito e cor) e mesclamos células para o título. Estas são apenas algumas das muitas opções de formatação disponíveis no Excel.');
+            });
+            
+            document.getElementById('resetar-btn').addEventListener('click', function() {
+                location.reload();
+            });
+            
+            // Manipulador para o botão da próxima aula
+            document.querySelector('.next').addEventListener('click', function() {
+                window.location.href = 'aula2_operacoes_basicas.html';
+            });
+            
+            // Adicionar smooth scroll para navegação
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+            
+            // Animação para o botão CTA
+            document.querySelector('.cta-button').addEventListener('click', function() {
+                document.querySelector('#recursos').scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

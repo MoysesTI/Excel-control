@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prisma Arena - Aula 9: Gráficos e Visualização</title>
+    <style>
+        :root {
+            --primary-color: #2e0259;
+            --secondary-color: #5727a3;
+            --accent-color: #9152e0;
+            --highlight-color: #bf7af0;
+            --star-color: #f5c6ff;
+            --text-color: #ffffff;
+            --dark-bg: #0a0118;
+            --cell-border: #5727a3;
+            --grid-bg: rgba(15, 3, 40, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(145, 82, 224, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 70% 60%, rgba(191, 122, 240, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 40% 80%, rgba(245, 198, 255, 0.08) 0%, transparent 20%);
+            overflow-x: hidden;
+        }
+
+        header {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(145, 82, 224, 0.5);
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--star-color), var(--highlight-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(245, 198, 255, 0.3);
+            display: flex;
+            align-items: center;
+        }
+
+        .logo::before {
+            content: "✧";
+            margin-right: 0.5rem;
+            font-size: 1.8rem;
+            -webkit-text-fill-color: var(--star-color);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--highlight-color);
+            transition: width 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--highlight-color);
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4rem 1rem;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, var(--accent-color), var(--highlight-color), var(--star-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            max-width: 700px;
+            margin-bottom: 2.5rem;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #d8c3e9;
+        }
+
+        .cta-button {
+            background: linear-gradient(45deg, var(--accent-color), var(--highlight-color));
+            color: var(--text-color);
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(145, 82, 224, 0.5);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(145, 82, 224, 0.7);
+        }
+
+        .content-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 1rem;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 2.5rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: "";
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(to right, var(--accent-color), var(--highlight-color));
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .feature-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(145, 82, 224, 0.1), rgba(191, 122, 240, 0.1));
+            z-index: -1;
+            transform: translateY(100%);
+            transition: transform 0.5s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(145, 82, 224, 0.3);
+        }
+
+        .feature-card:hover::before {
+            transform: translateY(0);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--highlight-color);
+        }
+
+        .feature-card h3 {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            color: var(--highlight-color);
+        }
+
+        .feature-card p {
+            color: #d8c3e9;
+            line-height: 1.5;
+        }
+
+        .demo-section {
+            background: var(--grid-bg);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 4rem auto;
+            max-width: 1000px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--secondary-color);
+        }
+
+        .chart-controls {
+            background-color: rgba(46, 2, 89, 0.5);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+            border: 1px solid var(--accent-color);
+        }
+
+        .chart-type-section, .data-section {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .control-title {
+            color: var(--highlight-color);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+
+        .chart-types {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+        }
+
+        .chart-type {
+            background-color: rgba(10, 1, 24, 0.7);
+            border: 1px solid var(--secondary-color);
+            border-radius: 6px;
+            padding: 0.8rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: transform 0.3s, border-color 0.3s;
+            width: calc(33.33% - 0.6rem);
+        }
+
+        .chart-type:hover {
+            transform: translateY(-5px);
+            border-color: var(--highlight-color);
+        }
+
+        .chart-type.selected {
+            border-color: var(--highlight-color);
+            background-color: rgba(87, 39, 163, 0.3);
+        }
+
+        .chart-icon {
+            font-size: 1.8rem;
+            color: var(--star-color);
+        }
+
+        .chart-name {
+            font-size: 0.9rem;
+            text-align: center;
+        }
+
+        .data-row {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .data-label {
+            min-width: 100px;
+            color: var(--star-color);
+        }
+
+        .data-select, .data-input {
+            background-color: rgba(10, 1, 24, 0.7);
+            border: 1px solid var(--secondary-color);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            flex-grow: 1;
+        }
+
+        .chart-button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+            margin-top: 1rem;
+        }
+
+        .chart-button:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .chart-container {
+            margin-top: 2rem;
+            background-color: rgba(10, 1, 24, 0.7);
+            border: 1px solid var(--secondary-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 400px;
+        }
+
+        .chart-placeholder {
+            text-align: center;
+            color: var(--highlight-color);
+            padding: 2rem;
+        }
+
+        .chart-area {
+            width: 100%;
+            height: 400px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-bar {
+            position: absolute;
+            bottom: 0;
+            background: linear-gradient(to top, var(--secondary-color), var(--highlight-color));
+            border-radius: 6px 6px 0 0;
+            transition: height 1s ease-in-out;
+            width: 40px;
+        }
+
+        .chart-label {
+            position: absolute;
+            bottom: -25px;
+            transform: translateX(-50%);
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--star-color);
+            width: 80px;
+        }
+
+        .chart-value {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(46, 2, 89, 0.8);
+            color: var(--star-color);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            white-space: nowrap;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .chart-bar:hover .chart-value {
+            opacity: 1;
+        }
+
+        .data-table {
+            margin-top: 2rem;
+            overflow-x: auto;
+        }
+
+        .data-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th, .data-table td {
+            border: 1px solid var(--cell-border);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .data-table th {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+        }
+
+        .data-table tr:nth-child(even) {
+            background-color: rgba(87, 39, 163, 0.1);
+        }
+
+        .tutorial-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .step-card {
+            background: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 10px;
+            padding: 2rem;
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .step-content h3 {
+            margin-bottom: 1rem;
+            color: var(--highlight-color);
+        }
+
+        .step-content p {
+            color: #d8c3e9;
+            line-height: 1.6;
+        }
+
+        .keyboard-shortcut {
+            display: inline-block;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            margin: 0 0.2rem;
+        }
+
+        .chart-examples {
+            margin-top: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .chart-example {
+            background-color: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            transition: transform 0.3s;
+        }
+
+        .chart-example:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(145, 82, 224, 0.3);
+        }
+
+        .example-title {
+            color: var(--highlight-color);
+            font-size: 1.1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .example-icon {
+            font-size: 2.5rem;
+            color: var(--star-color);
+            margin: 1rem 0;
+        }
+
+        .example-desc {
+            color: #d8c3e9;
+            font-size: 0.9rem;
+        }
+
+        footer {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 3rem 1rem;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--star-color), var(--highlight-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+
+        .footer-nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .footer-nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-nav a:hover {
+            color: var(--highlight-color);
+        }
+
+        .copyright {
+            margin-top: 2rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        /* Efeito de partículas estelares */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background-color: var(--star-color);
+            border-radius: 50%;
+            animation: twinkle 5s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 0.2;
+                transform: scale(0.8);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+        }
+
+        .nav-button {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-button:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul {
+                gap: 1rem;
+                margin-top: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .step-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .chart-controls {
+                flex-direction: column;
+            }
+
+            .chart-type {
+                width: calc(50% - 0.4rem);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Efeito de estrelas -->
+    <div class="stars" id="stars"></div>
+
+    <header>
+        <div class="nav-container">
+            <div class="logo">Prisma Arena - Aula 9</div>
+            <nav>
+                <ul>
+                    <li><a href="#inicio">Início</a></li>
+                    <li><a href="#recursos">Recursos</a></li>
+                    <li><a href="#demo">Demonstração</a></li>
+                    <li><a href="#tutorial">Tutorial</a></li>
+                    <li><a href="index.html">Voltar ao Menu</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero" id="inicio">
+        <h1>Gráficos e Visualização na Era Estelar</h1>
+        <p>Nesta aula, você aprenderá a transformar dados brutos em visualizações impactantes. Domine a criação e personalização de diversos tipos de gráficos para comunicar informações de forma clara, eficiente e visualmente atraente.</p>
+        <button class="cta-button">Começar a Explorar</button>
+    </section>
+
+    <section class="content-section" id="recursos">
+        <h2 class="section-title">Recursos Estelares</h2>
+        <div class="grid-container">
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Tipos de Gráficos</h3>
+                <p>Explore os diversos tipos de gráficos disponíveis no Excel, como colunas, barras, linha, pizza, área, dispersão e muito mais, compreendendo quando usar cada um.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🎨</div>
+                <h3>Personalização Visual</h3>
+                <p>Aprenda a personalizar cores, fontes, legendas, eixos e outros elementos visuais para criar gráficos profissionais e alinhados com sua identidade visual.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3>Gráficos Dinâmicos</h3>
+                <p>Domine técnicas para criar gráficos que se atualizam automaticamente quando os dados mudam, garantindo visualizações sempre atualizadas e precisas.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📚</div>
+                <h3>Layouts e Estilos</h3>
+                <p>Descubra como aplicar layouts e estilos predefinidos para rapidamente transformar gráficos básicos em visualizações profissionais e impactantes.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📋</div>
+                <h3>Gráficos com Dados Filtrados</h3>
+                <p>Aprenda a criar gráficos que respondem a filtros e segmentações de dados, permitindo análises visuais dinâmicas e interativas.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Técnicas Avançadas</h3>
+                <p>Explore recursos avançados como eixos secundários, minigráficos, gráficos combinados e outras técnicas para visualizações sofisticadas e multidimensionais.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="demo-section" id="demo">
+        <h2 class="section-title">Demonstração Interativa</h2>
+        <p>Experimente a criação e personalização de gráficos nesta demonstração interativa. Selecione o tipo de gráfico e configure os dados para visualizar o resultado em tempo real.</p>
+        
+        <div class="chart-controls">
+            <div class="chart-type-section">
+                <div class="control-title">Escolha o Tipo de Gráfico</div>
+                <div class="chart-types">
+                    <div class="chart-type selected" data-type="column">
+                        <div class="chart-icon">📊</div>
+                        <div class="chart-name">Colunas</div>
+                    </div>
+                    <div class="chart-type" data-type="bar">
+                        <div class="chart-icon">📊</div>
+                        <div class="chart-name">Barras</div>
+                    </div>
+                    <div class="chart-type" data-type="line">
+                        <div class="chart-icon">📈</div>
+                        <div class="chart-name">Linha</div>
+                    </div>
+                    <div class="chart-type" data-type="pie">
+                        <div class="chart-icon">🍕</div>
+                        <div class="chart-name">Pizza</div>
+                    </div>
+                    <div class="chart-type" data-type="area">
+                        <div class="chart-icon">📉</div>
+                        <div class="chart-name">Área</div>
+                    </div>
+                    <div class="chart-type" data-type="scatter">
+                        <div class="chart-icon">⚡</div>
+                        <div class="chart-name">Dispersão</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="data-section">
+                <div class="control-title">Configure os Dados</div>
+                <div class="data-row">
+                    <div class="data-label">Título:</div>
+                    <input type="text" id="chart-title" class="data-input" placeholder="Digite o título do gráfico" value="Vendas por Produto">
+                </div>
+                <div class="data-row">
+                    <div class="data-label">Cor do Tema:</div>
+                    <select id="chart-color" class="data-select">
+                        <option value="default">Prisma Arena</option>
+                        <option value="blue">Azul Celeste</option>
+                        <option value="green">Verde Estelar</option>
+                        <option value="orange">Laranja Cósmico</option>
+                    </select>
+                </div>
+                <div class="data-row">
+                    <div class="data-label">Mostrar Valores:</div>
+                    <select id="show-values" class="data-select">
+                        <option value="yes">Sim</option>
+                        <option value="no">Não</option>
+                    </select>
+                </div>
+                <button id="update-chart" class="chart-button">Atualizar Gráfico</button>
+            </div>
+        </div>
+        
+        <div class="chart-container">
+            <div id="chart-area" class="chart-area">
+                <!-- O gráfico será gerado aqui dinamicamente -->
+            </div>
+        </div>
+        
+        <div class="data-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Categoria</th>
+                        <th>Vendas (Unidades)</th>
+                        <th>Editar</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Processador Quântico X9</td>
+                        <td>Hardware</td>
+                        <td>1250</td>
+                        <td><input type="number" class="data-value" value="1250" min="0" max="5000"></td>
+                    </tr>
+                    <tr>
+                        <td>Visor Holográfico V3</td>
+                        <td>Periférico</td>
+                        <td>870</td>
+                        <td><input type="number" class="data-value" value="870" min="0" max="5000"></td>
+                    </tr>
+                    <tr>
+                        <td>Módulo Neural Adaptativo</td>
+                        <td>Hardware</td>
+                        <td>1560</td>
+                        <td><input type="number" class="data-value" value="1560" min="0" max="5000"></td>
+                    </tr>
+                    <tr>
+                        <td>Software Prisma Cloud</td>
+                        <td>Software</td>
+                        <td>2800</td>
+                        <td><input type="number" class="data-value" value="2800" min="0" max="5000"></td>
+                    </tr>
+                    <tr>
+                        <td>Console Estelar Pro</td>
+                        <td>Hardware</td>
+                        <td>985</td>
+                        <td><input type="number" class="data-value" value="985" min="0" max="5000"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="content-section" id="tutorial">
+        <h2 class="section-title">Tutorial Passo a Passo</h2>
+        
+        <div class="tutorial-steps">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>Introdução aos Gráficos no Excel</h3>
+                    <p>Os gráficos transformam dados em informações visuais que facilitam a identificação de padrões, tendências e comparações. Para criar um gráfico básico no Excel, primeiro selecione os dados (incluindo cabeçalhos para rótulos) e, em seguida, vá para a guia <span class="keyboard-shortcut">Inserir</span> e escolha o tipo de gráfico desejado na seção Gráficos. O Excel criará instantaneamente o gráfico, que pode ser redimensionado e movido para qualquer lugar na planilha. Você também pode criar um gráfico rapidamente selecionando os dados e pressionando <span class="keyboard-shortcut">Alt+F1</span> para um gráfico embutido ou <span class="keyboard-shortcut">F11</span> para um gráfico em uma nova planilha. Lembre-se de que um bom gráfico deve transmitir a mensagem dos dados de forma clara e sem distorções, então escolha o tipo de gráfico mais adequado para seus dados e objetivo de comunicação.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Escolhendo o Tipo de Gráfico Certo</h3>
+                    <p>Cada tipo de gráfico é adequado para visualizar dados específicos: <span class="keyboard-shortcut">Colunas e Barras</span> são excelentes para comparar valores entre diferentes categorias. Use colunas para ênfase em tempo (meses, anos) e barras para nomes de categorias longos. <span class="keyboard-shortcut">Linhas</span> são ideais para mostrar tendências ao longo do tempo e dados contínuos. <span class="keyboard-shortcut">Pizza</span> funciona bem para mostrar proporções de um todo, mas apenas quando você tem poucas categorias (até 6). <span class="keyboard-shortcut">Área</span> destaca o volume total ao longo do tempo e mostra contribuições das partes para o todo. <span class="keyboard-shortcut">Dispersão</span> é perfeito para mostrar correlações entre duas variáveis numéricas. <span class="keyboard-shortcut">Radar</span> compara múltiplos atributos em forma circular. Para dados mais complexos, considere <span class="keyboard-shortcut">Gráficos Combinados</span> que integram diferentes tipos, como colunas e linhas, para visualizar dados com escalas diferentes.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Personalização e Formatação</h3>
+                    <p>Após criar um gráfico, você pode personalizá-lo usando as guias <span class="keyboard-shortcut">Design</span> e <span class="keyboard-shortcut">Formatar</span> que aparecem quando o gráfico está selecionado. Para adicionar um título, selecione o gráfico e use o botão "Elementos do Gráfico" (+) que aparece ao lado, ou acesse Design > Adicionar Elemento de Gráfico > Título do Gráfico. Para alterar cores, use Design > Alterar Cores ou clique com o botão direito em elementos específicos para formatar individualmente. Para ajustar eixos, clique duas vezes em um eixo ou use o botão de elementos do gráfico. Você pode adicionar ou remover linhas de grade, legendas e rótulos de dados da mesma forma. Para um visual profissional rápido, explore os estilos predefinidos na guia Design. Lembre-se: mantenha a formatação simples e consistente; use cores com propósito, não apenas por estética; e certifique-se de que o texto seja legível, especialmente em apresentações projetadas.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h3>Gráficos Dinâmicos</h3>
+                    <p>Os gráficos dinâmicos se atualizam automaticamente quando os dados subjacentes mudam, tornando-os ideais para painéis e relatórios regulares. Para criar um gráfico dinâmico, primeiro transforme seus dados em uma <span class="keyboard-shortcut">Tabela Excel</span> (Ctrl+T) para que ele expanda automaticamente quando novos dados são adicionados. Em seguida, crie um gráfico normalmente com esses dados. Outra abordagem é usar <span class="keyboard-shortcut">funções DESLOCAMENTO e INDIRETO</span> para definir intervalos dinâmicos e fazer referência a eles ao criar gráficos. Para gráficos interativos, você pode vincular gráficos a <span class="keyboard-shortcut">Segmentações de Dados</span> (Inserir > Segmentação de Dados) para permitir a filtragem visual. Mais avançado ainda, você pode criar <span class="keyboard-shortcut">Gráficos Dinâmicos</span> baseados em Tabelas Dinâmicas, que se ajustam automaticamente quando você altera a estrutura da tabela dinâmica subjacente. Esses gráficos são particularmente poderosos para exploração interativa de dados complexos.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                    <h3>Técnicas Avançadas de Visualização</h3>
+                    <p>Para visualizações mais sofisticadas, explore recursos avançados como: <span class="keyboard-shortcut">Eixos Secundários</span> para plotar séries com escalas diferentes no mesmo gráfico (clique com botão direito na série > Formatar Série de Dados > Eixo Secundário); <span class="keyboard-shortcut">Minigráficos</span> (Inserir > Minigráficos) para mostrar tendências compactas dentro de células; <span class="keyboard-shortcut">Gráficos de Cascata</span> para visualizar contribuições positivas e negativas para um total; <span class="keyboard-shortcut">Mapas</span> para dados geográficos; e <span class="keyboard-shortcut">Treemaps</span> para hierarquias complexas. Você também pode aplicar <span class="keyboard-shortcut">Linhas de Tendência</span> (clique com botão direito na série > Adicionar Linha de Tendência) para visualizar projeções futuras e adicionar <span class="keyboard-shortcut">Barras de Erro</span> para mostrar variabilidade nos dados. Para dar destaque a pontos específicos, use <span class="keyboard-shortcut">Formatação Condicional</span> aplicada diretamente a elementos do gráfico ou crie <span class="keyboard-shortcut">Séries Fantasma</span> que existem apenas para destacar valores importantes.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">6</div>
+                <div class="step-content">
+                    <h3>Boas Práticas e Dicas Profissionais</h3>
+                    <p>Para criar visualizações verdadeiramente eficazes, siga estas práticas recomendadas: <span class="keyboard-shortcut">Simplifique</span> - remova elementos desnecessários como linhas de grade excessivas, efeitos 3D, e decorações que não agregam informação; <span class="keyboard-shortcut">Seja preciso</span> - inicie eixos numéricos em zero para evitar distorções visuais; <span class="keyboard-shortcut">Rotule claramente</span> - inclua títulos informativos, legendas claras e unidades de medida; <span class="keyboard-shortcut">Mantenha consistência</span> - use as mesmas cores e estilos para as mesmas variáveis em diferentes gráficos; <span class="keyboard-shortcut">Considere acessibilidade</span> - use combinações de cores distinguíveis para daltônicos e padrões além de cores quando necessário; <span class="keyboard-shortcut">Itere</span> - crie múltiplas versões e peça feedback; e <span class="keyboard-shortcut">Conte uma história</span> - organize seus gráficos em uma sequência lógica que conduza a insights. Lembre-se que o melhor gráfico é aquele que comunica sua mensagem de forma clara e honesta, não necessariamente o mais complexo ou visualmente impressionante.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-examples">
+            <div class="chart-example">
+                <div class="example-title">Colunas</div>
+                <div class="example-icon">📊</div>
+                <div class="example-desc">Ideal para comparar valores entre diferentes categorias ou mostrar mudanças ao longo do tempo.</div>
+            </div>
+            <div class="chart-example">
+                <div class="example-title">Linha</div>
+                <div class="example-icon">📈</div>
+                <div class="example-desc">Perfeito para visualizar tendências em dados contínuos e séries temporais.</div>
+            </div>
+            <div class="chart-example">
+                <div class="example-title">Pizza</div>
+                <div class="example-icon">🍕</div>
+                <div class="example-desc">Excelente para mostrar proporções e percentuais de um todo quando há poucas categorias.</div>
+            </div>
+            <div class="chart-example">
+                <div class="example-title">Dispersão</div>
+                <div class="example-icon">⚡</div>
+                <div class="example-desc">Usado para mostrar correlações entre duas variáveis numéricas e identificar padrões.</div>
+            </div>
+        </div>
+
+        <div class="navigation-buttons">
+            <button class="nav-button previous">← Aula Anterior</button>
+            <button class="nav-button next">Próxima Aula →</button>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">Prisma Arena - Aula 9</div>
+            <p>Explorando o universo do Excel com tecnologia estelar</p>
+            <div class="footer-nav">
+                <a href="#inicio">Início</a>
+                <a href="#recursos">Recursos</a>
+                <a href="#demo">Demonstração</a>
+                <a href="#tutorial">Tutorial</a>
+                <a href="index.html">Menu Principal</a>
+            </div>
+            <p class="copyright">© 2025 Prisma Arena. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Criar efeito de estrelas
+        document.addEventListener('DOMContentLoaded', function() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 100;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                star.style.width = `${Math.random() * 3 + 1}px`;
+                star.style.height = star.style.width;
+                starsContainer.appendChild(star);
+            }
+
+            // Seleção de tipo de gráfico
+            const chartTypes = document.querySelectorAll('.chart-type');
+            let selectedChartType = 'column'; // Tipo padrão
+            
+            chartTypes.forEach(type => {
+                type.addEventListener('click', function() {
+                    // Remover seleção atual
+                    document.querySelector('.chart-type.selected').classList.remove('selected');
+                    // Adicionar seleção ao clicado
+                    this.classList.add('selected');
+                    // Atualizar tipo selecionado
+                    selectedChartType = this.getAttribute('data-type');
+                    
+                    // Atualizar visualização do gráfico
+                    updateChart();
+                });
+            });
+            
+            // Função para atualizar o gráfico
+            function updateChart() {
+                const chartArea = document.getElementById('chart-area');
+                const dataValues = document.querySelectorAll('.data-value');
+                const chartTitle = document.getElementById('chart-title').value || 'Vendas por Produto';
+                const chartColor = document.getElementById('chart-color').value;
+                const showValues = document.getElementById('show-values').value === 'yes';
+                
+                // Limpar área do gráfico
+                chartArea.innerHTML = '';
+                
+                // Dados dos produtos na tabela
+                const products = document.querySelectorAll('tbody tr td:first-child');
+                
+                // Determinar o valor máximo para escala
+                let maxValue = 0;
+                dataValues.forEach(input => {
+                    const value = parseInt(input.value);
+                    if (value > maxValue) maxValue = value;
+                });
+                
+                // Criar título do gráfico
+                const titleElement = document.createElement('div');
+                titleElement.style.textAlign = 'center';
+                titleElement.style.color = 'white';
+                titleElement.style.fontSize = '1.2rem';
+                titleElement.style.marginBottom = '1rem';
+                titleElement.textContent = chartTitle;
+                chartArea.appendChild(titleElement);
+                
+                // Cores baseadas no tema selecionado
+                let colors;
+                switch (chartColor) {
+                    case 'blue':
+                        colors = ['#3498db', '#2980b9', '#1abc9c', '#16a085', '#2ecc71'];
+                        break;
+                    case 'green':
+                        colors = ['#2ecc71', '#27ae60', '#1abc9c', '#16a085', '#3498db'];
+                        break;
+                    case 'orange':
+                        colors = ['#e67e22', '#d35400', '#f39c12', '#e74c3c', '#c0392b'];
+                        break;
+                    default: // Prisma Arena
+                        colors = ['#9152e0', '#bf7af0', '#5727a3', '#f5c6ff', '#2e0259'];
+                }
+                
+                // Criar elementos do gráfico com base no tipo selecionado
+                switch (selectedChartType) {
+                    case 'column':
+                    case 'bar':
+                        // Gráfico de colunas ou barras
+                        const chartContainer = document.createElement('div');
+                        chartContainer.style.display = 'flex';
+                        chartContainer.style.height = '300px';
+                        chartContainer.style.alignItems = 'flex-end';
+                        chartContainer.style.justifyContent = 'space-around';
+                        chartContainer.style.marginTop = '40px';
+                        chartContainer.style.position = 'relative';
+                        
+                        // Eixo X
+                        const xAxis = document.createElement('div');
+                        xAxis.style.position = 'absolute';
+                        xAxis.style.bottom = '0';
+                        xAxis.style.left = '0';
+                        xAxis.style.right = '0';
+                        xAxis.style.height = '1px';
+                        xAxis.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+                        chartContainer.appendChild(xAxis);
+                        
+                        // Criar barras para cada produto
+                        dataValues.forEach((input, index) => {
+                            const value = parseInt(input.value);
+                            const percentHeight = (value / maxValue) * 100;
+                            const productName = products[index].textContent;
+                            
+                            const bar = document.createElement('div');
+                            bar.className = 'chart-bar';
+                            bar.style.height = `${percentHeight}%`;
+                            bar.style.backgroundColor = colors[index % colors.length];
+                            
+                            if (selectedChartType === 'bar') {
+                                // Para gráfico de barras horizontais
+                                bar.style.width = `${percentHeight}%`;
+                                bar.style.height = '40px';
+                                bar.style.position = 'static';
+                                bar.style.margin = '10px 0';
+                                bar.style.borderRadius = '0 6px 6px 0';
+                            }
+                            
+                            const label = document.createElement('div');
+                            label.className = 'chart-label';
+                            label.textContent = productName.length > 15 ? productName.substring(0, 15) + '...' : productName;
+                            
+                            if (showValues) {
+                                const valueDisplay = document.createElement('div');
+                                valueDisplay.className = 'chart-value';
+                                valueDisplay.textContent = value;
+                                bar.appendChild(valueDisplay);
+                            }
+                            
+                            bar.appendChild(label);
+                            chartContainer.appendChild(bar);
+                        });
+                        
+                        chartArea.appendChild(chartContainer);
+                        break;
+                        
+                    case 'pie':
+                        // Implementação simplificada de um gráfico de pizza
+                        const pieContainer = document.createElement('div');
+                        pieContainer.style.width = '300px';
+                        pieContainer.style.height = '300px';
+                        pieContainer.style.borderRadius = '50%';
+                        pieContainer.style.background = 'conic-gradient(';
+                        
+                        let totalValue = 0;
+                        dataValues.forEach(input => {
+                            totalValue += parseInt(input.value);
+                        });
+                        
+                        let startAngle = 0;
+                        dataValues.forEach((input, index) => {
+                            const value = parseInt(input.value);
+                            const percentage = (value / totalValue) * 100;
+                            const endAngle = startAngle + (percentage * 3.6); // 3.6 = 360/100
+                            
+                            pieContainer.style.background += `${colors[index % colors.length]} ${startAngle}deg ${endAngle}deg, `;
+                            startAngle = endAngle;
+                        });
+                        
+                        pieContainer.style.background = pieContainer.style.background.slice(0, -2) + ')';
+                        pieContainer.style.margin = '0 auto';
+                        
+                        chartArea.appendChild(pieContainer);
+                        
+                        // Criar legendas
+                        const legendContainer = document.createElement('div');
+                        legendContainer.style.display = 'flex';
+                        legendContainer.style.flexWrap = 'wrap';
+                        legendContainer.style.justifyContent = 'center';
+                        legendContainer.style.marginTop = '20px';
+                        legendContainer.style.gap = '10px';
+                        
+                        dataValues.forEach((input, index) => {
+                            const value = parseInt(input.value);
+                            const percentage = ((value / totalValue) * 100).toFixed(1);
+                            const productName = products[index].textContent;
+                            
+                            const legend = document.createElement('div');
+                            legend.style.display = 'flex';
+                            legend.style.alignItems = 'center';
+                            legend.style.gap = '5px';
+                            
+                            const colorIndicator = document.createElement('div');
+                            colorIndicator.style.width = '15px';
+                            colorIndicator.style.height = '15px';
+                            colorIndicator.style.backgroundColor = colors[index % colors.length];
+                            colorIndicator.style.borderRadius = '3px';
+                            
+                            const namePercent = document.createElement('div');
+                            namePercent.textContent = `${productName}: ${percentage}%`;
+                            
+                            legend.appendChild(colorIndicator);
+                            legend.appendChild(namePercent);
+                            legendContainer.appendChild(legend);
+                        });
+                        
+                        chartArea.appendChild(legendContainer);
+                        break;
+                        
+                    case 'line':
+                        // Implementação simplificada de um gráfico de linha
+                        const lineContainer = document.createElement('div');
+                        lineContainer.style.position = 'relative';
+                        lineContainer.style.height = '300px';
+                        lineContainer.style.width = '100%';
+                        lineContainer.style.padding = '10px';
+                        lineContainer.style.boxSizing = 'border-box';
+                        
+                        // Eixos
+                        const lineYAxis = document.createElement('div');
+                        lineYAxis.style.position = 'absolute';
+                        lineYAxis.style.left = '0';
+                        lineYAxis.style.top = '0';
+                        lineYAxis.style.bottom = '0';
+                        lineYAxis.style.width = '1px';
+                        lineYAxis.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+                        
+                        const lineXAxis = document.createElement('div');
+                        lineXAxis.style.position = 'absolute';
+                        lineXAxis.style.left = '0';
+                        lineXAxis.style.right = '0';
+                        lineXAxis.style.bottom = '0';
+                        lineXAxis.style.height = '1px';
+                        lineXAxis.style.backgroundColor = 'rgba(255, 255, 255, 0.3)';
+                        
+                        lineContainer.appendChild(lineYAxis);
+                        lineContainer.appendChild(lineXAxis);
+                        
+                        // Linha do gráfico
+                        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+                        svg.setAttribute('width', '100%');
+                        svg.setAttribute('height', '300');
+                        svg.style.position = 'absolute';
+                        svg.style.top = '0';
+                        svg.style.left = '0';
+                        
+                        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                        let pathData = 'M ';
+                        const width = lineContainer.clientWidth || 600;
+                        const segmentWidth = width / (dataValues.length - 1);
+                        
+                        dataValues.forEach((input, index) => {
+                            const value = parseInt(input.value);
+                            const x = index * segmentWidth;
+                            const y = 300 - ((value / maxValue) * 280);
+                            
+                            pathData += `${x} ${y} `;
+                            if (index < dataValues.length - 1) pathData += 'L ';
+                            
+                            // Adicionar pontos
+                            const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+                            circle.setAttribute('cx', x);
+                            circle.setAttribute('cy', y);
+                            circle.setAttribute('r', '5');
+                            circle.setAttribute('fill', colors[0]);
+                            svg.appendChild(circle);
+                            
+                            // Rótulos do eixo X
+                            const productName = products[index].textContent.substring(0, 10);
+                            const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                            text.setAttribute('x', x);
+                            text.setAttribute('y', 298);
+                            text.setAttribute('text-anchor', 'middle');
+                            text.setAttribute('fill', 'white');
+                            text.setAttribute('font-size', '12');
+                            text.textContent = productName;
+                            svg.appendChild(text);
+                            
+                            if (showValues) {
+                                const valueText = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                                valueText.setAttribute('x', x);
+                                valueText.setAttribute('y', y - 10);
+                                valueText.setAttribute('text-anchor', 'middle');
+                                valueText.setAttribute('fill', 'white');
+                                valueText.setAttribute('font-size', '12');
+                                valueText.textContent = value;
+                                svg.appendChild(valueText);
+                            }
+                        });
+                        
+                        path.setAttribute('d', pathData);
+                        path.setAttribute('stroke', colors[0]);
+                        path.setAttribute('stroke-width', '3');
+                        path.setAttribute('fill', 'none');
+                        
+                        svg.appendChild(path);
+                        lineContainer.appendChild(svg);
+                        
+                        chartArea.appendChild(lineContainer);
+                        break;
+                        
+                    default:
+                        // Para outros tipos de gráfico, mostrar mensagem de placeholder
+                        const placeholder = document.createElement('div');
+                        placeholder.className = 'chart-placeholder';
+                        placeholder.textContent = `Visualização para gráfico de ${selectedChartType} será implementada em breve!`;
+                        chartArea.appendChild(placeholder);
+                }
+            }
+            
+            // Atualizar gráfico quando os dados mudam
+            document.getElementById('update-chart').addEventListener('click', updateChart);
+            
+            // Inicializar o gráfico
+            updateChart();
+            
+            // Atualizar gráfico quando os inputs de dados mudam
+            document.querySelectorAll('.data-value').forEach(input => {
+                input.addEventListener('change', () => {
+                    // Atualizar valor na coluna da tabela
+                    const row = input.closest('tr');
+                    const valueCell = row.cells[2];
+                    valueCell.textContent = input.value;
+                });
+            });
+            
+            // Manipulador para os botões de navegação
+            document.querySelector('.previous').addEventListener('click', function() {
+                window.location.href = 'aula8_manipulacao_dados.html';
+            });
+            
+            document.querySelector('.next').addEventListener('click', function() {
+                window.location.href = 'aula10_tabelas_dinamicas.html';
+            });
+            
+            // Adicionar smooth scroll para navegação
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+            
+            // Animação para o botão CTA
+            document.querySelector('.cta-button').addEventListener('click', function() {
+                document.querySelector('#recursos').scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

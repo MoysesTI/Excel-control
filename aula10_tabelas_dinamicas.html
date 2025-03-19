@@ -1,0 +1,1221 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prisma Arena - Aula 10: Tabelas Dinâmicas</title>
+    <style>
+        :root {
+            --primary-color: #2e0259;
+            --secondary-color: #5727a3;
+            --accent-color: #9152e0;
+            --highlight-color: #bf7af0;
+            --star-color: #f5c6ff;
+            --text-color: #ffffff;
+            --dark-bg: #0a0118;
+            --cell-border: #5727a3;
+            --grid-bg: rgba(15, 3, 40, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(145, 82, 224, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 70% 60%, rgba(191, 122, 240, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 40% 80%, rgba(245, 198, 255, 0.08) 0%, transparent 20%);
+            overflow-x: hidden;
+        }
+
+        header {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(145, 82, 224, 0.5);
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--star-color), var(--highlight-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(245, 198, 255, 0.3);
+            display: flex;
+            align-items: center;
+        }
+
+        .logo::before {
+            content: "✧";
+            margin-right: 0.5rem;
+            font-size: 1.8rem;
+            -webkit-text-fill-color: var(--star-color);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--highlight-color);
+            transition: width 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--highlight-color);
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4rem 1rem;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, var(--accent-color), var(--highlight-color), var(--star-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            max-width: 700px;
+            margin-bottom: 2.5rem;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #d8c3e9;
+        }
+
+        .cta-button {
+            background: linear-gradient(45deg, var(--accent-color), var(--highlight-color));
+            color: var(--text-color);
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(145, 82, 224, 0.5);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(145, 82, 224, 0.7);
+        }
+
+        .content-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 1rem;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 2.5rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: "";
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(to right, var(--accent-color), var(--highlight-color));
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .feature-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(145, 82, 224, 0.1), rgba(191, 122, 240, 0.1));
+            z-index: -1;
+            transform: translateY(100%);
+            transition: transform 0.5s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(145, 82, 224, 0.3);
+        }
+
+        .feature-card:hover::before {
+            transform: translateY(0);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--highlight-color);
+        }
+
+        .feature-card h3 {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            color: var(--highlight-color);
+        }
+
+        .feature-card p {
+            color: #d8c3e9;
+            line-height: 1.5;
+        }
+
+        .demo-section {
+            background: var(--grid-bg);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 4rem auto;
+            max-width: 1000px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--secondary-color);
+        }
+
+        .pivot-builder {
+            background-color: rgba(46, 2, 89, 0.5);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            border: 1px solid var(--accent-color);
+        }
+
+        .pivot-title {
+            color: var(--highlight-color);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+
+        .pivot-layout {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1.5rem;
+        }
+
+        .field-list, .drop-zones {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .field-list-title, .zone-title {
+            color: var(--star-color);
+            font-size: 1rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .fields {
+            background-color: rgba(10, 1, 24, 0.7);
+            border: 1px solid var(--secondary-color);
+            border-radius: 6px;
+            padding: 1rem;
+            min-height: 200px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .field {
+            background-color: rgba(87, 39, 163, 0.3);
+            border: 1px solid var(--accent-color);
+            border-radius: 4px;
+            padding: 0.5rem;
+            margin-bottom: 0.5rem;
+            cursor: move;
+            transition: background-color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .field:hover {
+            background-color: rgba(145, 82, 224, 0.3);
+        }
+
+        .field-icon {
+            font-size: 1.1rem;
+            opacity: 0.8;
+        }
+
+        .field.dragging {
+            opacity: 0.5;
+        }
+
+        .drop-zones {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-gap: 1rem;
+        }
+
+        .drop-zone {
+            background-color: rgba(10, 1, 24, 0.7);
+            border: 1px dashed var(--secondary-color);
+            border-radius: 6px;
+            padding: 1rem;
+            min-height: 120px;
+        }
+
+        .drop-zone.highlight {
+            border-color: var(--highlight-color);
+            background-color: rgba(145, 82, 224, 0.15);
+        }
+
+        .zone-label {
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .pivot-controls {
+            margin-top: 1.5rem;
+            display: flex;
+            gap: 1rem;
+        }
+
+        .pivot-button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+        }
+
+        .pivot-button:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .pivot-result {
+            margin-top: 2rem;
+            overflow-x: auto;
+        }
+
+        .pivot-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .pivot-table th {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            border: 1px solid var(--cell-border);
+            padding: 0.75rem;
+            text-align: left;
+            font-weight: 600;
+        }
+
+        .pivot-table td {
+            border: 1px solid var(--cell-border);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .pivot-table .row-header {
+            background-color: rgba(87, 39, 163, 0.2);
+            font-weight: 600;
+        }
+
+        .pivot-table .total-row {
+            background-color: rgba(87, 39, 163, 0.3);
+            font-weight: 600;
+        }
+
+        .pivot-table .total-cell {
+            background-color: rgba(145, 82, 224, 0.3);
+            font-weight: 600;
+        }
+
+        .data-table {
+            margin-top: 2rem;
+            background-color: rgba(10, 1, 24, 0.7);
+            border: 1px solid var(--secondary-color);
+            border-radius: 8px;
+            overflow-x: auto;
+        }
+
+        .data-table table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th, .data-table td {
+            border: 1px solid var(--cell-border);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .data-table th {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+        }
+
+        .data-table tr:nth-child(even) {
+            background-color: rgba(87, 39, 163, 0.1);
+        }
+
+        .tutorial-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .step-card {
+            background: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 10px;
+            padding: 2rem;
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .step-content h3 {
+            margin-bottom: 1rem;
+            color: var(--highlight-color);
+        }
+
+        .step-content p {
+            color: #d8c3e9;
+            line-height: 1.6;
+        }
+
+        .keyboard-shortcut {
+            display: inline-block;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            margin: 0 0.2rem;
+        }
+
+        .benefits-list {
+            margin-top: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .benefit-item {
+            background-color: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 8px;
+            padding: 1.2rem;
+            transition: transform 0.3s;
+        }
+
+        .benefit-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(145, 82, 224, 0.3);
+        }
+
+        .benefit-icon {
+            font-size: 2rem;
+            color: var(--highlight-color);
+            margin-bottom: 0.8rem;
+        }
+
+        .benefit-title {
+            font-size: 1.1rem;
+            color: var(--star-color);
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .benefit-desc {
+            color: #d8c3e9;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        footer {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 3rem 1rem;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--star-color), var(--highlight-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+
+        .footer-nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .footer-nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-nav a:hover {
+            color: var(--highlight-color);
+        }
+
+        .copyright {
+            margin-top: 2rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        /* Efeito de partículas estelares */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background-color: var(--star-color);
+            border-radius: 50%;
+            animation: twinkle 5s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 0.2;
+                transform: scale(0.8);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+        }
+
+        .nav-button {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-button:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul {
+                gap: 1rem;
+                margin-top: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .step-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .drop-zones {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Efeito de estrelas -->
+    <div class="stars" id="stars"></div>
+
+    <header>
+        <div class="nav-container">
+            <div class="logo">Prisma Arena - Aula 10</div>
+            <nav>
+                <ul>
+                    <li><a href="#inicio">Início</a></li>
+                    <li><a href="#recursos">Recursos</a></li>
+                    <li><a href="#demo">Demonstração</a></li>
+                    <li><a href="#tutorial">Tutorial</a></li>
+                    <li><a href="index.html">Voltar ao Menu</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero" id="inicio">
+        <h1>Tabelas Dinâmicas na Era Estelar</h1>
+        <p>Nesta aula, você dominará uma das ferramentas mais poderosas do Excel: as Tabelas Dinâmicas. Aprenda a transformar grandes conjuntos de dados em resumos concisos e interativos, revelando insights valiosos com apenas alguns cliques.</p>
+        <button class="cta-button">Começar a Explorar</button>
+    </section>
+
+    <section class="content-section" id="recursos">
+        <h2 class="section-title">Recursos Estelares</h2>
+        <div class="grid-container">
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Criação Básica</h3>
+                <p>Aprenda os fundamentos para criar tabelas dinâmicas eficientes a partir de qualquer conjunto de dados estruturado, transformando linhas de informação em resumos poderosos.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔀</div>
+                <h3>Layout e Design</h3>
+                <p>Domine as diferentes opções de layout, compreendendo como organizar campos em linhas, colunas, valores e filtros para obter exatamente a visualização que você precisa.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🧮</div>
+                <h3>Cálculos e Resumos</h3>
+                <p>Explore as diversas opções de cálculo disponíveis, como soma, média, contagem, máximo, mínimo e muito mais, personalizando como seus dados são agregados.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔍</div>
+                <h3>Filtragem e Segmentação</h3>
+                <p>Descubra ferramentas avançadas de filtragem, incluindo segmentação de dados e linha do tempo, para criar painéis interativos que respondem aos seus comandos.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📈</div>
+                <h3>Gráficos Dinâmicos</h3>
+                <p>Transforme suas tabelas dinâmicas em gráficos dinâmicos impressionantes, criando visualizações que se atualizam automaticamente quando os dados mudam.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Campos Calculados</h3>
+                <p>Aprenda a criar campos e itens calculados para expandir as possibilidades analíticas das tabelas dinâmicas, construindo métricas personalizadas.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="demo-section" id="demo">
+        <h2 class="section-title">Demonstração Interativa</h2>
+        <p>Experimente a criação de uma tabela dinâmica nesta demonstração interativa. Arraste os campos disponíveis para as diferentes áreas da tabela dinâmica e veja o resultado em tempo real.</p>
+        
+        <div class="pivot-builder">
+            <div class="pivot-title">Construtor de Tabela Dinâmica</div>
+            <div class="pivot-layout">
+                <div class="field-list">
+                    <div class="field-list-title">Campos Disponíveis</div>
+                    <div class="fields" id="field-list">
+                        <div class="field" draggable="true" data-field="produto">
+                            <span class="field-icon">Aa</span>
+                            <span>Produto</span>
+                        </div>
+                        <div class="field" draggable="true" data-field="categoria">
+                            <span class="field-icon">Aa</span>
+                            <span>Categoria</span>
+                        </div>
+                        <div class="field" draggable="true" data-field="regiao">
+                            <span class="field-icon">Aa</span>
+                            <span>Região</span>
+                        </div>
+                        <div class="field" draggable="true" data-field="vendedor">
+                            <span class="field-icon">Aa</span>
+                            <span>Vendedor</span>
+                        </div>
+                        <div class="field" draggable="true" data-field="data">
+                            <span class="field-icon">📅</span>
+                            <span>Data</span>
+                        </div>
+                        <div class="field" draggable="true" data-field="quantidade">
+                            <span class="field-icon">#</span>
+                            <span>Quantidade</span>
+                        </div>
+                        <div class="field" draggable="true" data-field="valor">
+                            <span class="field-icon">$</span>
+                            <span>Valor</span>
+                        </div>
+                        <div class="field" draggable="true" data-field="custos">
+                            <span class="field-icon">$</span>
+                            <span>Custos</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="drop-zones">
+                    <div class="zone-title">Áreas da Tabela Dinâmica</div>
+                    <div class="drop-zone" id="filters-zone">
+                        <div class="zone-label">FILTROS</div>
+                        <!-- Campos arrastados para cá -->
+                    </div>
+                    <div class="drop-zone" id="columns-zone">
+                        <div class="zone-label">COLUNAS</div>
+                        <!-- Campos arrastados para cá -->
+                    </div>
+                    <div class="drop-zone" id="rows-zone">
+                        <div class="zone-label">LINHAS</div>
+                        <!-- Campos arrastados para cá -->
+                    </div>
+                    <div class="drop-zone" id="values-zone">
+                        <div class="zone-label">VALORES</div>
+                        <!-- Campos arrastados para cá -->
+                    </div>
+                </div>
+            </div>
+            
+            <div class="pivot-controls">
+                <button id="create-pivot" class="pivot-button">Criar Tabela Dinâmica</button>
+                <button id="reset-pivot" class="pivot-button" style="background-color: #44173e;">Limpar Campos</button>
+            </div>
+        </div>
+        
+        <div class="pivot-result" style="display: none;" id="pivot-result">
+            <table class="pivot-table" id="pivot-table">
+                <!-- A tabela dinâmica será gerada aqui -->
+            </table>
+        </div>
+        
+        <div class="data-table">
+            <div class="pivot-title">Dados de Origem</div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Categoria</th>
+                        <th>Região</th>
+                        <th>Vendedor</th>
+                        <th>Data</th>
+                        <th>Quantidade</th>
+                        <th>Valor</th>
+                        <th>Custos</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Processador Quântico</td>
+                        <td>Hardware</td>
+                        <td>Norte</td>
+                        <td>João Silva</td>
+                        <td>15/01/2025</td>
+                        <td>15</td>
+                        <td>22500</td>
+                        <td>15000</td>
+                    </tr>
+                    <tr>
+                        <td>Visor Holográfico</td>
+                        <td>Periférico</td>
+                        <td>Sul</td>
+                        <td>Ana Costa</td>
+                        <td>22/01/2025</td>
+                        <td>8</td>
+                        <td>12800</td>
+                        <td>8000</td>
+                    </tr>
+                    <tr>
+                        <td>Console Estelar</td>
+                        <td>Hardware</td>
+                        <td>Leste</td>
+                        <td>Pedro Alves</td>
+                        <td>05/02/2025</td>
+                        <td>12</td>
+                        <td>36000</td>
+                        <td>24000</td>
+                    </tr>
+                    <tr>
+                        <td>Software Prisma</td>
+                        <td>Software</td>
+                        <td>Oeste</td>
+                        <td>Carlos Gomes</td>
+                        <td>10/02/2025</td>
+                        <td>20</td>
+                        <td>10000</td>
+                        <td>2000</td>
+                    </tr>
+                    <tr>
+                        <td>Módulo Neural</td>
+                        <td>Hardware</td>
+                        <td>Norte</td>
+                        <td>João Silva</td>
+                        <td>18/02/2025</td>
+                        <td>6</td>
+                        <td>9000</td>
+                        <td>6000</td>
+                    </tr>
+                    <tr>
+                        <td>Licença Enterprise</td>
+                        <td>Software</td>
+                        <td>Sul</td>
+                        <td>Ana Costa</td>
+                        <td>25/02/2025</td>
+                        <td>10</td>
+                        <td>15000</td>
+                        <td>3000</td>
+                    </tr>
+                    <tr>
+                        <td>Processador Quântico</td>
+                        <td>Hardware</td>
+                        <td>Oeste</td>
+                        <td>Carlos Gomes</td>
+                        <td>05/03/2025</td>
+                        <td>8</td>
+                        <td>12000</td>
+                        <td>8000</td>
+                    </tr>
+                    <tr>
+                        <td>Visor Holográfico</td>
+                        <td>Periférico</td>
+                        <td>Leste</td>
+                        <td>Pedro Alves</td>
+                        <td>12/03/2025</td>
+                        <td>5</td>
+                        <td>8000</td>
+                        <td>5000</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="content-section" id="tutorial">
+        <h2 class="section-title">Tutorial Passo a Passo</h2>
+        
+        <div class="tutorial-steps">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>Introdução às Tabelas Dinâmicas</h3>
+                    <p>As tabelas dinâmicas são uma das ferramentas mais poderosas do Excel para análise de dados. Elas permitem reorganizar, resumir e analisar grandes conjuntos de dados rapidamente, extraindo insights valiosos sem a necessidade de fórmulas complexas. Para criar uma tabela dinâmica básica, selecione qualquer célula dentro de seus dados e vá para <span class="keyboard-shortcut">Inserir > Tabela Dinâmica</span> ou pressione <span class="keyboard-shortcut">Alt+N+V</span>. O Excel detectará automaticamente seus dados e abrirá uma caixa de diálogo onde você pode escolher colocar a tabela dinâmica em uma nova planilha ou na planilha atual. A interface da tabela dinâmica consiste em uma lista de campos (colunas de dados) e quatro áreas: Filtros, Colunas, Linhas e Valores. Ao arrastar campos para estas áreas, você determina como seus dados serão organizados e resumidos.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Construindo uma Tabela Dinâmica Eficaz</h3>
+                    <p>Para construir uma tabela dinâmica útil, considere a pergunta que deseja responder com seus dados. Em seguida, arraste os campos apropriados para cada área: <span class="keyboard-shortcut">Linhas</span> – Normalmente contém campos categóricos que você deseja analisar (ex: Produtos, Regiões); <span class="keyboard-shortcut">Colunas</span> – Adiciona uma segunda dimensão à análise, permitindo comparações lado a lado (ex: Meses, Anos); <span class="keyboard-shortcut">Valores</span> – Contém campos numéricos que serão agregados (ex: Vendas, Quantidades); <span class="keyboard-shortcut">Filtros</span> – Adiciona filtros globais acima da tabela para refinar a análise (ex: País, Categoria). Você pode adicionar vários campos a cada área e reordená-los arrastando-os para cima ou para baixo, o que afeta a hierarquia na tabela. Dependendo do tipo de dado, o Excel aplicará diferentes funções de resumo automaticamente – soma para números, contagem para texto – mas você pode alterar isso facilmente clicando com o botão direito no campo de valor e selecionando "Configurações do Campo de Valor".</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Personalizando Cálculos e Formatação</h3>
+                    <p>Após criar a estrutura básica da tabela dinâmica, você pode personalizar como os valores são calculados e formatados. Para alterar o cálculo, clique com o botão direito em qualquer célula de valor e selecione <span class="keyboard-shortcut">Configurações do Campo de Valor</span>, ou clique no campo na lista de campos e selecione "Configurações do Campo de Valor". No diálogo que aparece, você pode escolher entre várias funções de resumo como Soma, Média, Contagem, Máx, Mín, etc. Na guia "Mostrar valores como", você pode transformar os valores em porcentagens do total, diferenças de outros campos, classificações e muito mais. Para formatação visual, use a guia "Formatar Número" nesse mesmo diálogo ou os controles de formatação na faixa de opções. Você também pode aplicar formatação condicional à tabela dinâmica inteira usando os mesmos controles que usaria em células normais (guia Página Inicial). Para um estilo visual rápido, use a guia "Design" que aparece quando a tabela dinâmica está selecionada para aplicar estilos predefinidos e outros ajustes de layout.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h3>Filtragem e Segmentação de Dados</h3>
+                    <p>As tabelas dinâmicas oferecem poderosas opções de filtragem para refinar sua análise. Cada campo nas áreas de Linhas, Colunas e Filtros tem um menu suspenso (seta) que permite selecionar quais itens deseja mostrar ou ocultar. Além disso, ao clicar com o botão direito em qualquer item, você pode filtrar para mostrar/ocultar apenas esse item ou fazer filtragens mais avançadas. Para uma experiência mais interativa, utilize <span class="keyboard-shortcut">Segmentações de Dados</span>, acessíveis pela guia Analisar > Inserir Segmentação. Esta ferramenta cria controles visuais de filtragem que podem ser posicionados em qualquer lugar da planilha e conectados a várias tabelas dinâmicas simultaneamente. Para dados temporais, a <span class="keyboard-shortcut">Linha do Tempo</span> (também no menu Inserir Segmentação) oferece um controle intuitivo para filtrar por períodos. Ao usar várias segmentações, você pode criar painéis interativos onde cada seleção ajusta instantaneamente sua tabela dinâmica, permitindo explorar seus dados de diferentes ângulos sem precisar recriar relatórios.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                    <h3>Tabelas e Gráficos Dinâmicos</h3>
+                    <p>As tabelas dinâmicas podem ser transformadas em gráficos dinâmicos, que oferecem visualizações que se atualizam automaticamente junto com a tabela. Para criar um gráfico dinâmico, selecione qualquer célula na tabela dinâmica e vá para <span class="keyboard-shortcut">Inserir > Gráfico Dinâmico</span> ou use o botão na guia Analisar. Você pode selecionar qualquer tipo de gráfico que seria adequado para seus dados, como colunas, barras, linhas ou pizza. O gráfico respeita a estrutura da tabela dinâmica e herda todos os filtros e segmentações. Qualquer alteração na estrutura da tabela (como adicionar campos ou alterar a função de resumo) atualiza automaticamente o gráfico. Da mesma forma, filtros aplicados usando segmentações ou filtros da tabela afetam tanto a tabela quanto o gráfico. Isso torna os gráficos dinâmicos ideais para dashboards interativos, onde o usuário pode filtrar dados e ver os resultados visualmente. Para personalizar o gráfico, use os controles padrão de gráfico do Excel acessíveis quando o gráfico está selecionado.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">6</div>
+                <div class="step-content">
+                    <h3>Técnicas Avançadas e Dicas</h3>
+                    <p>Para extrair ainda mais das tabelas dinâmicas, explore estas técnicas avançadas: <span class="keyboard-shortcut">Campos Calculados</span> – Crie novos campos com fórmulas personalizadas (Analisar > Campos, Itens e Conjuntos > Campo Calculado); <span class="keyboard-shortcut">Agrupar Dados</span> – Agrupe facilmente datas em períodos (meses, trimestres, anos) ou valores numéricos em intervalos clicando com o botão direito em um campo e selecionando "Agrupar"; <span class="keyboard-shortcut">Layout de Relatório</span> – Alterne entre layouts compacto, de contorno ou tabular na guia Design para diferentes visualizações; <span class="keyboard-shortcut">Atualização</span> – Para dados que mudam, use Analisar > Atualizar ou clique com o botão direito para atualizar a tabela; <span class="keyboard-shortcut">Detalhar</span> – Dê duplo clique em qualquer célula de valor para criar uma nova planilha mostrando os registros detalhados; <span class="keyboard-shortcut">Múltiplas Tabelas</span> – Crie várias tabelas dinâmicas vinculadas à mesma fonte e use segmentações compartilhadas para análises multifacetadas. Lembre-se: para dados preparados eficientemente, sua fonte deve estar estruturada como uma tabela, sem células vazias nos cabeçalhos e sem dados irrelevantes ao redor.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="benefits-list">
+            <div class="benefit-item">
+                <div class="benefit-icon">⚡</div>
+                <div class="benefit-title">Análise Rápida</div>
+                <div class="benefit-desc">Transforme milhares de linhas de dados em resumos significativos em segundos, sem necessidade de fórmulas complexas.</div>
+            </div>
+            <div class="benefit-item">
+                <div class="benefit-icon">🔄</div>
+                <div class="benefit-title">Flexibilidade</div>
+                <div class="benefit-desc">Reorganize instantaneamente seus dados arrastando campos para visualizar diferentes perspectivas sem alterar os dados originais.</div>
+            </div>
+            <div class="benefit-item">
+                <div class="benefit-icon">📊</div>
+                <div class="benefit-title">Visualização Interativa</div>
+                <div class="benefit-desc">Combine com gráficos dinâmicos e segmentações para criar dashboards interativos que respondem instantaneamente a mudanças.</div>
+            </div>
+            <div class="benefit-item">
+                <div class="benefit-icon">🔍</div>
+                <div class="benefit-title">Detalhamento</div>
+                <div class="benefit-desc">Explore facilmente de visões resumidas para detalhadas com duplo clique para descobrir os dados subjacentes.</div>
+            </div>
+        </div>
+
+        <div class="navigation-buttons">
+            <button class="nav-button previous">← Aula Anterior</button>
+            <button class="nav-button next">Próxima Aula →</button>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">Prisma Arena - Aula 10</div>
+            <p>Explorando o universo do Excel com tecnologia estelar</p>
+            <div class="footer-nav">
+                <a href="#inicio">Início</a>
+                <a href="#recursos">Recursos</a>
+                <a href="#demo">Demonstração</a>
+                <a href="#tutorial">Tutorial</a>
+                <a href="index.html">Menu Principal</a>
+            </div>
+            <p class="copyright">© 2025 Prisma Arena. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Criar efeito de estrelas
+        document.addEventListener('DOMContentLoaded', function() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 100;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                star.style.width = `${Math.random() * 3 + 1}px`;
+                star.style.height = star.style.width;
+                starsContainer.appendChild(star);
+            }
+
+            // Funcionalidade de arrastar e soltar para campos da tabela dinâmica
+            const fields = document.querySelectorAll('.field');
+            const dropZones = document.querySelectorAll('.drop-zone');
+            let draggedField = null;
+            
+            // Funções para o arrastar e soltar
+            fields.forEach(field => {
+                field.addEventListener('dragstart', function(e) {
+                    draggedField = this;
+                    this.classList.add('dragging');
+                    e.dataTransfer.setData('text/plain', this.getAttribute('data-field'));
+                });
+                
+                field.addEventListener('dragend', function() {
+                    this.classList.remove('dragging');
+                });
+            });
+            
+            dropZones.forEach(zone => {
+                zone.addEventListener('dragover', function(e) {
+                    e.preventDefault();
+                    this.classList.add('highlight');
+                });
+                
+                zone.addEventListener('dragleave', function() {
+                    this.classList.remove('highlight');
+                });
+                
+                zone.addEventListener('drop', function(e) {
+                    e.preventDefault();
+                    this.classList.remove('highlight');
+                    
+                    if (draggedField) {
+                        // Clone o campo e adicione-o à zona de destino
+                        const clone = draggedField.cloneNode(true);
+                        clone.setAttribute('draggable', 'false');
+                        
+                        // Adicione um botão de remoção ao campo clonado
+                        const removeBtn = document.createElement('span');
+                        removeBtn.innerHTML = '✕';
+                        removeBtn.style.marginLeft = 'auto';
+                        removeBtn.style.cursor = 'pointer';
+                        removeBtn.style.opacity = '0.7';
+                        removeBtn.addEventListener('click', function() {
+                            this.parentNode.remove();
+                        });
+                        
+                        clone.appendChild(removeBtn);
+                        this.appendChild(clone);
+                        
+                        // Destaque o campo original na lista sem removê-lo
+                        draggedField.style.opacity = '0.5';
+                    }
+                });
+            });
+            
+            // Botão para resetar os campos
+            document.getElementById('reset-pivot').addEventListener('click', function() {
+                // Limpar todos os campos nas zonas de destino
+                dropZones.forEach(zone => {
+                    // Manter apenas o rótulo da zona
+                    const label = zone.querySelector('.zone-label');
+                    zone.innerHTML = '';
+                    zone.appendChild(label);
+                });
+                
+                // Restaurar a opacidade dos campos na lista
+                fields.forEach(field => {
+                    field.style.opacity = '1';
+                });
+                
+                // Ocultar o resultado da tabela dinâmica
+                document.getElementById('pivot-result').style.display = 'none';
+            });
+            
+            // Botão para criar a tabela dinâmica
+            document.getElementById('create-pivot').addEventListener('click', function() {
+                // Verificar se há campos nas áreas necessárias
+                const rowsZone = document.getElementById('rows-zone');
+                const valuesZone = document.getElementById('values-zone');
+                
+                if (rowsZone.childElementCount <= 1 || valuesZone.childElementCount <= 1) {
+                    alert('Por favor, adicione pelo menos um campo às áreas de LINHAS e VALORES para criar a tabela dinâmica.');
+                    return;
+                }
+                
+                // Extrair campos de cada zona
+                const rowFields = Array.from(rowsZone.querySelectorAll('.field')).map(f => f.getAttribute('data-field'));
+                const columnFields = Array.from(document.getElementById('columns-zone').querySelectorAll('.field')).map(f => f.getAttribute('data-field'));
+                const valueFields = Array.from(valuesZone.querySelectorAll('.field')).map(f => f.getAttribute('data-field'));
+                
+                // Gerar uma tabela dinâmica simplificada
+                generatePivotTable(rowFields, columnFields, valueFields);
+                
+                // Mostrar a área de resultado
+                document.getElementById('pivot-result').style.display = 'block';
+            });
+            
+            // Função para gerar a tabela dinâmica (simplificada)
+            function generatePivotTable(rowFields, columnFields, valueFields) {
+                const pivotTable = document.getElementById('pivot-table');
+                pivotTable.innerHTML = '';
+                
+                // Dados de exemplo para simulação (normalmente viriam da tabela de dados)
+                const sampleData = {
+                    // Valores para diferentes combinações de categorias
+                    'Hardware_Norte': { 'quantidade': 29, 'valor': 43500, 'custos': 29000 },
+                    'Hardware_Sul': { 'quantidade': 0, 'valor': 0, 'custos': 0 },
+                    'Hardware_Leste': { 'quantidade': 12, 'valor': 36000, 'custos': 24000 },
+                    'Hardware_Oeste': { 'quantidade': 8, 'valor': 12000, 'custos': 8000 },
+                    
+                    'Software_Norte': { 'quantidade': 0, 'valor': 0, 'custos': 0 },
+                    'Software_Sul': { 'quantidade': 10, 'valor': 15000, 'custos': 3000 },
+                    'Software_Leste': { 'quantidade': 0, 'valor': 0, 'custos': 0 },
+                    'Software_Oeste': { 'quantidade': 20, 'valor': 10000, 'custos': 2000 },
+                    
+                    'Periférico_Norte': { 'quantidade': 0, 'valor': 0, 'custos': 0 },
+                    'Periférico_Sul': { 'quantidade': 8, 'valor': 12800, 'custos': 8000 },
+                    'Periférico_Leste': { 'quantidade': 5, 'valor': 8000, 'custos': 5000 },
+                    'Periférico_Oeste': { 'quantidade': 0, 'valor': 0, 'custos': 0 }
+                };
+                
+                // Simular tabela dinâmica básica
+                // Este é um exemplo simplificado - em um caso real, processaríamos os dados reais
+                
+                // Para este exemplo, vamos assumir que estamos agrupando por categoria nas linhas
+                // e região nas colunas, com valores mostrando soma de quantidade ou valor
+                
+                // Cabeçalho
+                let thead = document.createElement('thead');
+                let headerRow = document.createElement('tr');
+                
+                // Célula vazia no canto superior esquerdo
+                let cornerCell = document.createElement('th');
+                headerRow.appendChild(cornerCell);
+                
+                // Cabeçalhos de coluna
+                let regions = ['Norte', 'Sul', 'Leste', 'Oeste', 'Total'];
+                regions.forEach(region => {
+                    let th = document.createElement('th');
+                    th.textContent = region;
+                    headerRow.appendChild(th);
+                });
+                
+                thead.appendChild(headerRow);
+                pivotTable.appendChild(thead);
+                
+                // Corpo da tabela
+                let tbody = document.createElement('tbody');
+                
+                // Linhas de dados
+                let categories = ['Hardware', 'Software', 'Periférico', 'Total'];
+                
+                categories.forEach(category => {
+                    let tr = document.createElement('tr');
+                    
+                    // Cabeçalho da linha
+                    let th = document.createElement('th');
+                    th.textContent = category;
+                    th.className = category === 'Total' ? 'total-row' : 'row-header';
+                    tr.appendChild(th);
+                    
+                    // Valores para cada região
+                    let categoryTotal = 0;
+                    
+                    regions.forEach(region => {
+                        if (region === 'Total') {
+                            // Célula de total para esta categoria
+                            let td = document.createElement('td');
+                            td.textContent = categoryTotal.toLocaleString();
+                            td.className = 'total-cell';
+                            tr.appendChild(td);
+                        } else {
+                            let td = document.createElement('td');
+                            
+                            // Obter o valor adequado baseado no campo de valor selecionado
+                            let key = `${category}_${region}`;
+                            let value = 0;
+                            
+                            if (sampleData[key]) {
+                                // Usar o primeiro campo de valor como exemplo
+                                value = sampleData[key][valueFields[0]] || 0;
+                                categoryTotal += value;
+                            }
+                            
+                            td.textContent = value > 0 ? value.toLocaleString() : '-';
+                            tr.appendChild(td);
+                        }
+                    });
+                    
+                    tbody.appendChild(tr);
+                });
+                
+                pivotTable.appendChild(tbody);
+            }
+            
+            // Manipulador para os botões de navegação
+            document.querySelector('.previous').addEventListener('click', function() {
+                window.location.href = 'aula9_graficos.html';
+            });
+            
+            document.querySelector('.next').addEventListener('click', function() {
+                window.location.href = 'aula11_revisao.html';
+            });
+            
+            // Adicionar smooth scroll para navegação
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+            
+            // Animação para o botão CTA
+            document.querySelector('.cta-button').addEventListener('click', function() {
+                document.querySelector('#recursos').scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

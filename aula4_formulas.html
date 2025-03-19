@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prisma Arena - Aula 4: Fórmulas</title>
+    <style>
+        :root {
+            --primary-color: #2e0259;
+            --secondary-color: #5727a3;
+            --accent-color: #9152e0;
+            --highlight-color: #bf7af0;
+            --star-color: #f5c6ff;
+            --text-color: #ffffff;
+            --dark-bg: #0a0118;
+            --cell-border: #5727a3;
+            --grid-bg: rgba(15, 3, 40, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(145, 82, 224, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 70% 60%, rgba(191, 122, 240, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 40% 80%, rgba(245, 198, 255, 0.08) 0%, transparent 20%);
+            overflow-x: hidden;
+        }
+
+        header {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(145, 82, 224, 0.5);
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--star-color), var(--highlight-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(245, 198, 255, 0.3);
+            display: flex;
+            align-items: center;
+        }
+
+        .logo::before {
+            content: "✧";
+            margin-right: 0.5rem;
+            font-size: 1.8rem;
+            -webkit-text-fill-color: var(--star-color);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--highlight-color);
+            transition: width 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--highlight-color);
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4rem 1rem;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, var(--accent-color), var(--highlight-color), var(--star-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            max-width: 700px;
+            margin-bottom: 2.5rem;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #d8c3e9;
+        }
+
+        .cta-button {
+            background: linear-gradient(45deg, var(--accent-color), var(--highlight-color));
+            color: var(--text-color);
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(145, 82, 224, 0.5);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(145, 82, 224, 0.7);
+        }
+
+        .content-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 1rem;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 2.5rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: "";
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(to right, var(--accent-color), var(--highlight-color));
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .feature-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(145, 82, 224, 0.1), rgba(191, 122, 240, 0.1));
+            z-index: -1;
+            transform: translateY(100%);
+            transition: transform 0.5s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(145, 82, 224, 0.3);
+        }
+
+        .feature-card:hover::before {
+            transform: translateY(0);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--highlight-color);
+        }
+
+        .feature-card h3 {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            color: var(--highlight-color);
+        }
+
+        .feature-card p {
+            color: #d8c3e9;
+            line-height: 1.5;
+        }
+
+        .demo-section {
+            background: var(--grid-bg);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 4rem auto;
+            max-width: 1000px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--secondary-color);
+        }
+
+        .formula-input {
+            background-color: rgba(46, 2, 89, 0.5);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            border: 1px solid var(--accent-color);
+        }
+        
+        .formula-label {
+            font-weight: bold;
+            color: var(--star-color);
+            min-width: 80px;
+        }
+        
+        .formula-field {
+            flex-grow: 1;
+            background-color: rgba(10, 1, 24, 0.7);
+            border: 1px solid var(--secondary-color);
+            color: white;
+            padding: 0.8rem;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        .formula-button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .formula-button:hover {
+            background-color: var(--accent-color);
+        }
+
+        .spreadsheet-demo {
+            overflow-x: auto;
+            margin-top: 2rem;
+            background-color: rgba(10, 1, 24, 0.7);
+            border-radius: 8px;
+            border: 1px solid var(--secondary-color);
+        }
+
+        .formula-display {
+            margin-top: 1rem;
+            background-color: rgba(46, 2, 89, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px dashed var(--accent-color);
+            font-family: monospace;
+            color: var(--highlight-color);
+            display: none;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 800px;
+        }
+
+        th, td {
+            border: 1px solid var(--cell-border);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: rgba(87, 39, 163, 0.1);
+        }
+
+        tr:hover {
+            background-color: rgba(145, 82, 224, 0.2);
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .control-button {
+            background: var(--primary-color);
+            color: var(--text-color);
+            border: 1px solid var(--accent-color);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .selected-cell {
+            background-color: rgba(191, 122, 240, 0.3) !important;
+        }
+
+        .tutorial-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .step-card {
+            background: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 10px;
+            padding: 2rem;
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .step-content h3 {
+            margin-bottom: 1rem;
+            color: var(--highlight-color);
+        }
+
+        .step-content p {
+            color: #d8c3e9;
+            line-height: 1.6;
+        }
+
+        .keyboard-shortcut {
+            display: inline-block;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            margin: 0 0.2rem;
+        }
+
+        .formula-examples {
+            margin-top: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .formula-card {
+            background-color: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 8px;
+            padding: 1rem;
+            transition: transform 0.3s;
+        }
+        
+        .formula-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(145, 82, 224, 0.3);
+        }
+        
+        .formula-title {
+            color: var(--highlight-color);
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        
+        .formula-syntax {
+            font-family: monospace;
+            background-color: rgba(10, 1, 24, 0.6);
+            padding: 0.5rem;
+            border-radius: 4px;
+            color: var(--star-color);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .formula-description {
+            color: #d8c3e9;
+            font-size: 0.9rem;
+        }
+
+        footer {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 3rem 1rem;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--star-color), var(--highlight-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+
+        .footer-nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .footer-nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-nav a:hover {
+            color: var(--highlight-color);
+        }
+
+        .copyright {
+            margin-top: 2rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        /* Efeito de partículas estelares */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background-color: var(--star-color);
+            border-radius: 50%;
+            animation: twinkle 5s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 0.2;
+                transform: scale(0.8);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+        }
+
+        .nav-button {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-button:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul {
+                gap: 1rem;
+                margin-top: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .step-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .controls {
+                justify-content: center;
+            }
+
+            .formula-input {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Efeito de estrelas -->
+    <div class="stars" id="stars"></div>
+
+    <header>
+        <div class="nav-container">
+            <div class="logo">Prisma Arena - Aula 4</div>
+            <nav>
+                <ul>
+                    <li><a href="#inicio">Início</a></li>
+                    <li><a href="#recursos">Recursos</a></li>
+                    <li><a href="#demo">Demonstração</a></li>
+                    <li><a href="#tutorial">Tutorial</a></li>
+                    <li><a href="index.html">Voltar ao Menu</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero" id="inicio">
+        <h1>O Poder das Fórmulas na Era Estelar</h1>
+        <p>Nesta aula, você iniciará sua jornada pelo universo das fórmulas no Excel. Aprenda os princípios fundamentais para criar cálculos automáticos, compreenda a estrutura das fórmulas e domine as operações aritméticas básicas para transformar seus dados em informações valiosas.</p>
+        <button class="cta-button">Começar a Explorar</button>
+    </section>
+
+    <section class="content-section" id="recursos">
+        <h2 class="section-title">Recursos Estelares</h2>
+        <div class="grid-container">
+            <div class="feature-card">
+                <div class="feature-icon">=</div>
+                <h3>Introdução às Fórmulas</h3>
+                <p>Compreenda o conceito fundamental de fórmulas no Excel, como criá-las e quando utilizá-las para automatizar cálculos e análises em suas planilhas.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🧮</div>
+                <h3>Operações Aritméticas</h3>
+                <p>Domine as operações básicas: adição (+), subtração (-), multiplicação (*), divisão (/) e exponenciação (^) para realizar cálculos precisos em seus dados.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3>Referências de Células</h3>
+                <p>Aprenda a referenciar células individuais e intervalos em suas fórmulas, permitindo cálculos dinâmicos que se atualizam automaticamente quando os dados mudam.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🧩</div>
+                <h3>Ordem de Operações</h3>
+                <p>Compreenda a ordem em que as operações são executadas nas fórmulas e como usar parênteses para controlar a precedência e obter resultados corretos.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Cópia de Fórmulas</h3>
+                <p>Descubra técnicas eficientes para copiar fórmulas para diversas células, aproveitando o ajuste automático de referências para processar grandes conjuntos de dados.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔍</div>
+                <h3>Depuração de Fórmulas</h3>
+                <p>Aprenda a identificar e corrigir erros comuns em fórmulas, compreendendo as mensagens de erro e utilizando técnicas de verificação para garantir cálculos precisos.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="demo-section" id="demo">
+        <h2 class="section-title">Demonstração Interativa</h2>
+        <p>Experimente a criação e aplicação de fórmulas nesta demonstração interativa. Digite uma fórmula na barra abaixo e veja o resultado ao aplicá-la em uma célula selecionada.</p>
+        
+        <div class="formula-input">
+            <div class="formula-label">=</div>
+            <input type="text" id="formula-field" class="formula-field" placeholder="Digite sua fórmula aqui (ex: A3+B3*2)">
+            <button id="apply-formula" class="formula-button">Aplicar</button>
+        </div>
+        
+        <div id="formula-display" class="formula-display">
+            Resultado: <span id="formula-result"></span>
+        </div>
+        
+        <div class="controls">
+            <button class="control-button" id="soma-btn">Soma (A+B)</button>
+            <button class="control-button" id="subtracao-btn">Subtração (A-B)</button>
+            <button class="control-button" id="multiplicacao-btn">Multiplicação (A*B)</button>
+            <button class="control-button" id="divisao-btn">Divisão (A/B)</button>
+            <button class="control-button" id="combinada-btn">Fórmula Combinada</button>
+            <button class="control-button" id="resetar-btn">Resetar</button>
+        </div>
+        
+        <div class="spreadsheet-demo">
+            <table id="data-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>A</th>
+                        <th>B</th>
+                        <th>C</th>
+                        <th>D</th>
+                        <th>E</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Valores</td>
+                        <td>Quantidade</td>
+                        <td>Preço</td>
+                        <td>Total</td>
+                        <td>Desconto</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Produto A</td>
+                        <td>5</td>
+                        <td>50</td>
+                        <td></td>
+                        <td>10%</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Produto B</td>
+                        <td>3</td>
+                        <td>75</td>
+                        <td></td>
+                        <td>5%</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Produto C</td>
+                        <td>8</td>
+                        <td>25</td>
+                        <td></td>
+                        <td>15%</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>Total</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="formula-examples">
+            <div class="formula-card">
+                <div class="formula-title">Soma</div>
+                <div class="formula-syntax">=B2+C2</div>
+                <div class="formula-description">Adiciona os valores das células B2 e C2.</div>
+            </div>
+            <div class="formula-card">
+                <div class="formula-title">Multiplicação</div>
+                <div class="formula-syntax">=B2*C2</div>
+                <div class="formula-description">Multiplica os valores das células B2 e C2.</div>
+            </div>
+            <div class="formula-card">
+                <div class="formula-title">Cálculo com Desconto</div>
+                <div class="formula-syntax">=B2*C2*(1-E2)</div>
+                <div class="formula-description">Calcula o valor total com desconto aplicado.</div>
+            </div>
+            <div class="formula-card">
+                <div class="formula-title">Média</div>
+                <div class="formula-syntax">=(B2+B3+B4)/3</div>
+                <div class="formula-description">Calcula a média dos valores nas células B2, B3 e B4.</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="content-section" id="tutorial">
+        <h2 class="section-title">Tutorial Passo a Passo</h2>
+        
+        <div class="tutorial-steps">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>Introdução às Fórmulas</h3>
+                    <p>As fórmulas são expressões que realizam cálculos com os dados em sua planilha. Toda fórmula no Excel começa com um sinal de igual (=). Após este sinal, você pode inserir números, operadores matemáticos, referências de células e funções. Por exemplo, uma fórmula simples seria <span class="keyboard-shortcut">=10+5</span>, que retornaria 15. As fórmulas podem referenciar valores em outras células, como <span class="keyboard-shortcut">=A1+B1</span>, que soma os valores nas células A1 e B1. O poder das fórmulas está na sua natureza dinâmica: quando os valores referenciados mudam, o resultado da fórmula é recalculado automaticamente. Para inserir uma fórmula, selecione a célula de destino, digite o sinal de igual e complete a expressão. Pressione Enter para confirmar.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Operações Aritméticas Básicas</h3>
+                    <p>O Excel utiliza operadores aritméticos padrão para cálculos matemáticos. Os principais são: <span class="keyboard-shortcut">+</span> (adição), <span class="keyboard-shortcut">-</span> (subtração), <span class="keyboard-shortcut">*</span> (multiplicação), <span class="keyboard-shortcut">/</span> (divisão) e <span class="keyboard-shortcut">^</span> (exponenciação). Exemplos: <span class="keyboard-shortcut">=A1+B1</span> (soma A1 e B1), <span class="keyboard-shortcut">=A1-B1</span> (subtrai B1 de A1), <span class="keyboard-shortcut">=A1*B1</span> (multiplica A1 por B1), <span class="keyboard-shortcut">=A1/B1</span> (divide A1 por B1), e <span class="keyboard-shortcut">=A1^2</span> (eleva A1 ao quadrado). Você também pode combinar operadores em uma única fórmula, como <span class="keyboard-shortcut">=A1+B1*C1</span>. O Excel segue a ordem padrão de operações matemáticas: primeiro exponenciação, depois multiplicação/divisão e por fim adição/subtração.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Referências de Células</h3>
+                    <p>As referências de células são o coração das fórmulas do Excel, permitindo que os cálculos utilizem valores de outras partes da planilha. Existem três tipos principais de referências: <span class="keyboard-shortcut">Relativas</span> (como A1), que se ajustam quando a fórmula é copiada para outra célula; <span class="keyboard-shortcut">Absolutas</span> (como $A$1), que permanecem fixas quando a fórmula é copiada (use F4 para alternar entre tipos de referência); e <span class="keyboard-shortcut">Mistas</span> (como $A1 ou A$1), onde apenas parte da referência é fixa. Você também pode referenciar intervalos de células, como <span class="keyboard-shortcut">A1:A10</span> (todas as células de A1 até A10) ou <span class="keyboard-shortcut">A1:C3</span> (um bloco retangular de células). Para referenciar células em outras planilhas, use <span class="keyboard-shortcut">Planilha1!A1</span>. Para outros arquivos, use <span class="keyboard-shortcut">'[Arquivo.xlsx]Planilha1'!A1</span>.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h3>Ordem de Operações</h3>
+                    <p>O Excel segue a ordem convencional de operações matemáticas, conhecida como PEMDAS: Parênteses, Exponenciação, Multiplicação/Divisão (da esquerda para a direita), Adição/Subtração (da esquerda para a direita). Por exemplo, na fórmula <span class="keyboard-shortcut">=5+10*2</span>, a multiplicação é realizada primeiro (10*2=20), depois a adição (5+20=25). Para alterar esta ordem, use parênteses: <span class="keyboard-shortcut">=(5+10)*2</span> calcula primeiro a soma (5+10=15) e depois a multiplicação (15*2=30). Parênteses podem ser aninhados, como em <span class="keyboard-shortcut">=((A1+B1)*C1)/D1</span>. O Excel processa de dentro para fora quando há parênteses aninhados. Se a precedência não estiver clara, adicione parênteses para garantir que a fórmula seja calculada como pretendido, mesmo que isso pareça redundante. É melhor ser explícito do que obter resultados incorretos.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                    <h3>Cópia de Fórmulas</h3>
+                    <p>Uma das funcionalidades mais poderosas do Excel é a capacidade de copiar fórmulas para outras células, automatizando cálculos para grandes conjuntos de dados. Para copiar uma fórmula, selecione a célula contendo a fórmula e use <span class="keyboard-shortcut">Ctrl+C</span>, ou arraste a alça de preenchimento (pequeno quadrado no canto inferior direito da célula selecionada) para estender a fórmula para células adjacentes. Por padrão, as referências relativas se ajustam, enquanto as absolutas permanecem fixas. Por exemplo, se a célula D2 contém <span class="keyboard-shortcut">=B2*C2</span> e você copiar para D3, a fórmula se ajustará para <span class="keyboard-shortcut">=B3*C3</span>. Se quiser manter algumas referências fixas, use referências absolutas ou mistas. Para aplicar a mesma fórmula a células não adjacentes, copie a fórmula e use <span class="keyboard-shortcut">Ctrl+V</span> para colá-la nas células desejadas.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">6</div>
+                <div class="step-content">
+                    <h3>Depuração de Fórmulas</h3>
+                    <p>Quando as fórmulas não funcionam como esperado, o Excel fornece ferramentas para ajudar na depuração. Indicadores de erro aparecem como pequenos triângulos verdes no canto superior esquerdo da célula. Clique na célula com erro e uma mensagem explicativa aparecerá. Erros comuns incluem: <span class="keyboard-shortcut">#DIV/0!</span> (divisão por zero), <span class="keyboard-shortcut">#VALUE!</span> (tipo de valor incorreto), <span class="keyboard-shortcut">#REF!</span> (referência inválida), <span class="keyboard-shortcut">#NAME?</span> (nome não reconhecido), <span class="keyboard-shortcut">#NUM!</span> (problema com um número) e <span class="keyboard-shortcut">#N/A</span> (valor não disponível). Para identificar problemas em fórmulas complexas, use o modo de avaliação de fórmulas (Fórmulas > Verificação de Fórmulas > Avaliar Fórmula), que permite percorrer a fórmula passo a passo. Outra técnica útil é a auditoria de fórmulas, que mostra visualmente quais células são usadas na fórmula (Fórmulas > Verificação de Fórmulas > Rastrear Precedentes/Dependentes).</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="navigation-buttons">
+            <button class="nav-button previous">← Aula Anterior</button>
+            <button class="nav-button next">Próxima Aula →</button>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">Prisma Arena - Aula 4</div>
+            <p>Explorando o universo do Excel com tecnologia estelar</p>
+            <div class="footer-nav">
+                <a href="#inicio">Início</a>
+                <a href="#recursos">Recursos</a>
+                <a href="#demo">Demonstração</a>
+                <a href="#tutorial">Tutorial</a>
+                <a href="index.html">Menu Principal</a>
+            </div>
+            <p class="copyright">© 2025 Prisma Arena. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Criar efeito de estrelas
+        document.addEventListener('DOMContentLoaded', function() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 100;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                star.style.width = `${Math.random() * 3 + 1}px`;
+                star.style.height = star.style.width;
+                starsContainer.appendChild(star);
+            }
+
+            // Funcionalidade de seleção de células
+            const table = document.getElementById('data-table');
+            let selectedCell = null;
+            
+            // Adicionando event listeners para as células da tabela
+            for (let i = 1; i < table.rows.length; i++) {
+                for (let j = 1; j < table.rows[i].cells.length; j++) {
+                    const cell = table.rows[i].cells[j];
+                    
+                    cell.addEventListener('click', function() {
+                        // Remover a classe da célula anteriormente selecionada
+                        if (selectedCell) {
+                            selectedCell.classList.remove('selected-cell');
+                        }
+                        
+                        // Adicionar a classe à nova célula selecionada
+                        this.classList.add('selected-cell');
+                        selectedCell = this;
+                    });
+                }
+            }
+            
+            // Função para avaliar expressões simples
+            function avaliarExpressao(expressao) {
+                try {
+                    // Substituir referências de células por seus valores
+                    let formula = expressao;
+                    const regex = /[A-Z][0-9]+/g;
+                    const matches = expressao.match(regex);
+                    
+                    if (matches) {
+                        matches.forEach(match => {
+                            const coluna = match.charCodeAt(0) - 65 + 1; // A=1, B=2, etc.
+                            const linha = parseInt(match.substring(1));
+                            
+                            if (linha > 0 && linha < table.rows.length && coluna > 0 && coluna < table.rows[0].cells.length) {
+                                const valor = table.rows[linha].cells[coluna].textContent.trim();
+                                const numValor = parseFloat(valor.replace(/[^0-9.-]/g, ''));
+                                
+                                if (!isNaN(numValor)) {
+                                    formula = formula.replace(new RegExp(match, 'g'), numValor);
+                                } else if (valor === '') {
+                                    formula = formula.replace(new RegExp(match, 'g'), 0);
+                                } else {
+                                    formula = formula.replace(new RegExp(match, 'g'), `"${valor}"`);
+                                }
+                            }
+                        });
+                    }
+                    
+                    // Avaliar a expressão (uso de forma segura)
+                    // Esta é uma implementação simples para demonstração
+                    formula = formula.replace(/[^0-9+\-*/()^. ]/g, '');
+                    return eval(formula);
+                } catch (error) {
+                    return "Erro na fórmula";
+                }
+            }
+            
+            // Aplicar fórmula
+            document.getElementById('apply-formula').addEventListener('click', function() {
+                if (selectedCell) {
+                    const formula = document.getElementById('formula-field').value;
+                    
+                    if (formula) {
+                        try {
+                            const resultado = avaliarExpressao(formula);
+                            selectedCell.textContent = resultado;
+                            
+                            // Mostrar o resultado no display
+                            document.getElementById('formula-result').textContent = resultado;
+                            document.getElementById('formula-display').style.display = 'block';
+                            
+                            // Armazenar a fórmula original como um atributo da célula
+                            selectedCell.setAttribute('data-formula', formula);
+                        } catch (error) {
+                            alert('Erro ao avaliar a fórmula. Verifique a sintaxe.');
+                        }
+                    } else {
+                        alert('Por favor, digite uma fórmula válida.');
+                    }
+                } else {
+                    alert('Por favor, selecione uma célula primeiro.');
+                }
+            });
+            
+            // Botões de fórmulas predefinidas
+            document.getElementById('soma-btn').addEventListener('click', function() {
+                if (selectedCell) {
+                    const rowIndex = selectedCell.parentNode.rowIndex;
+                    
+                    if (rowIndex > 0) {
+                        document.getElementById('formula-field').value = `B${rowIndex}+C${rowIndex}`;
+                        alert('Fórmula de soma gerada. Clique em "Aplicar" para calcular.');
+                    }
+                } else {
+                    alert('Por favor, selecione uma célula primeiro.');
+                }
+            });
+            
+            document.getElementById('subtracao-btn').addEventListener('click', function() {
+                if (selectedCell) {
+                    const rowIndex = selectedCell.parentNode.rowIndex;
+                    
+                    if (rowIndex > 0) {
+                        document.getElementById('formula-field').value = `C${rowIndex}-B${rowIndex}`;
+                        alert('Fórmula de subtração gerada. Clique em "Aplicar" para calcular.');
+                    }
+                } else {
+                    alert('Por favor, selecione uma célula primeiro.');
+                }
+            });
+            
+            document.getElementById('multiplicacao-btn').addEventListener('click', function() {
+                if (selectedCell) {
+                    const rowIndex = selectedCell.parentNode.rowIndex;
+                    
+                    if (rowIndex > 0) {
+                        document.getElementById('formula-field').value = `B${rowIndex}*C${rowIndex}`;
+                        alert('Fórmula de multiplicação gerada. Clique em "Aplicar" para calcular.');
+                    }
+                } else {
+                    alert('Por favor, selecione uma célula primeiro.');
+                }
+            });
+            
+            document.getElementById('divisao-btn').addEventListener('click', function() {
+                if (selectedCell) {
+                    const rowIndex = selectedCell.parentNode.rowIndex;
+                    
+                    if (rowIndex > 0) {
+                        document.getElementById('formula-field').value = `C${rowIndex}/B${rowIndex}`;
+                        alert('Fórmula de divisão gerada. Clique em "Aplicar" para calcular.');
+                    }
+                } else {
+                    alert('Por favor, selecione uma célula primeiro.');
+                }
+            });
+            
+            document.getElementById('combinada-btn').addEventListener('click', function() {
+                if (selectedCell) {
+                    const rowIndex = selectedCell.parentNode.rowIndex;
+                    
+                    if (rowIndex > 0) {
+                        document.getElementById('formula-field').value = `B${rowIndex}*C${rowIndex}*(1-E${rowIndex})`;
+                        alert('Fórmula combinada gerada (multiplicação com desconto). Clique em "Aplicar" para calcular.');
+                    }
+                } else {
+                    alert('Por favor, selecione uma célula primeiro.');
+                }
+            });
+            
+            // Botão Resetar
+            document.getElementById('resetar-btn').addEventListener('click', function() {
+                location.reload();
+            });
+            
+            // Manipulador para os botões de navegação
+            document.querySelector('.previous').addEventListener('click', function() {
+                window.location.href = 'aula3_formatacao.html';
+            });
+            
+            document.querySelector('.next').addEventListener('click', function() {
+                window.location.href = 'aula5_funcoes_basicas.html';
+            });
+            
+            // Adicionar smooth scroll para navegação
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+            
+            // Animação para o botão CTA
+            document.querySelector('.cta-button').addEventListener('click', function() {
+                document.querySelector('#recursos').scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

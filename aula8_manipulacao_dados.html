@@ -1,0 +1,1338 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prisma Arena - Aula 8: Manipulação de Dados</title>
+    <style>
+        :root {
+            --primary-color: #2e0259;
+            --secondary-color: #5727a3;
+            --accent-color: #9152e0;
+            --highlight-color: #bf7af0;
+            --star-color: #f5c6ff;
+            --text-color: #ffffff;
+            --dark-bg: #0a0118;
+            --cell-border: #5727a3;
+            --grid-bg: rgba(15, 3, 40, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(145, 82, 224, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 70% 60%, rgba(191, 122, 240, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 40% 80%, rgba(245, 198, 255, 0.08) 0%, transparent 20%);
+            overflow-x: hidden;
+        }
+
+        header {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(145, 82, 224, 0.5);
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--star-color), var(--highlight-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(245, 198, 255, 0.3);
+            display: flex;
+            align-items: center;
+        }
+
+        .logo::before {
+            content: "✧";
+            margin-right: 0.5rem;
+            font-size: 1.8rem;
+            -webkit-text-fill-color: var(--star-color);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--highlight-color);
+            transition: width 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--highlight-color);
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4rem 1rem;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, var(--accent-color), var(--highlight-color), var(--star-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            max-width: 700px;
+            margin-bottom: 2.5rem;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #d8c3e9;
+        }
+
+        .cta-button {
+            background: linear-gradient(45deg, var(--accent-color), var(--highlight-color));
+            color: var(--text-color);
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(145, 82, 224, 0.5);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(145, 82, 224, 0.7);
+        }
+
+        .content-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 1rem;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 2.5rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: "";
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(to right, var(--accent-color), var(--highlight-color));
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .feature-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(145, 82, 224, 0.1), rgba(191, 122, 240, 0.1));
+            z-index: -1;
+            transform: translateY(100%);
+            transition: transform 0.5s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(145, 82, 224, 0.3);
+        }
+
+        .feature-card:hover::before {
+            transform: translateY(0);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--highlight-color);
+        }
+
+        .feature-card h3 {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            color: var(--highlight-color);
+        }
+
+        .feature-card p {
+            color: #d8c3e9;
+            line-height: 1.5;
+        }
+
+        .demo-section {
+            background: var(--grid-bg);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 4rem auto;
+            max-width: 1000px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--secondary-color);
+        }
+
+        .data-tools {
+            background-color: rgba(46, 2, 89, 0.5);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            border: 1px solid var(--accent-color);
+        }
+
+        .filter-section {
+            flex-grow: 1;
+            min-width: 300px;
+        }
+
+        .sort-section {
+            flex-grow: 1;
+            min-width: 300px;
+        }
+
+        .tool-title {
+            color: var(--highlight-color);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+
+        .filter-row {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.7rem;
+        }
+
+        .filter-label {
+            min-width: 80px;
+            color: var(--star-color);
+        }
+
+        .filter-select, .filter-input {
+            background-color: rgba(10, 1, 24, 0.7);
+            border: 1px solid var(--secondary-color);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            flex-grow: 1;
+        }
+
+        .filter-button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-top: 0.5rem;
+        }
+
+        .filter-button:hover {
+            background-color: var(--accent-color);
+        }
+
+        .sort-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.7rem;
+        }
+
+        .sort-option {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background-color: rgba(10, 1, 24, 0.5);
+            padding: 0.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .sort-option:hover {
+            background-color: rgba(87, 39, 163, 0.3);
+        }
+
+        .sort-radio {
+            appearance: none;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            border: 2px solid var(--accent-color);
+            background-color: transparent;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .sort-radio:checked::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0.5rem;
+            height: 0.5rem;
+            border-radius: 50%;
+            background-color: var(--highlight-color);
+        }
+
+        .sort-desc {
+            color: #d8c3e9;
+            font-size: 0.9rem;
+        }
+
+        .spreadsheet-demo {
+            overflow-x: auto;
+            margin-top: 2rem;
+            background-color: rgba(10, 1, 24, 0.7);
+            border-radius: 8px;
+            border: 1px solid var(--secondary-color);
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 800px;
+        }
+
+        th, td {
+            border: 1px solid var(--cell-border);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            font-weight: 600;
+            position: relative;
+            cursor: pointer;
+        }
+
+        th:hover {
+            background-color: var(--accent-color);
+        }
+
+        th::after {
+            content: "⇅";
+            position: absolute;
+            right: 10px;
+            opacity: 0.7;
+        }
+
+        tr:nth-child(even) {
+            background-color: rgba(87, 39, 163, 0.1);
+        }
+
+        tr:hover {
+            background-color: rgba(145, 82, 224, 0.2);
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .control-button {
+            background: var(--primary-color);
+            color: var(--text-color);
+            border: 1px solid var(--accent-color);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .hidden-row {
+            display: none;
+        }
+
+        .filtered-status {
+            margin-top: 1rem;
+            background-color: rgba(46, 2, 89, 0.3);
+            border-radius: 4px;
+            padding: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--star-color);
+            display: none;
+        }
+
+        .tutorial-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .step-card {
+            background: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 10px;
+            padding: 2rem;
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .step-content h3 {
+            margin-bottom: 1rem;
+            color: var(--highlight-color);
+        }
+
+        .step-content p {
+            color: #d8c3e9;
+            line-height: 1.6;
+        }
+
+        .keyboard-shortcut {
+            display: inline-block;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            margin: 0 0.2rem;
+        }
+
+        .data-tips {
+            margin-top: 2rem;
+            border-radius: 8px;
+            padding: 1.5rem;
+            background-color: rgba(46, 2, 89, 0.3);
+            border: 1px dashed var(--accent-color);
+        }
+
+        .tips-title {
+            color: var(--highlight-color);
+            font-size: 1.3rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .tips-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .tip-item {
+            background-color: rgba(87, 39, 163, 0.2);
+            border-radius: 4px;
+            padding: 1rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 0.7rem;
+        }
+
+        .tip-icon {
+            color: var(--star-color);
+            font-size: 1.2rem;
+            line-height: 1.5;
+        }
+
+        .tip-text {
+            color: #d8c3e9;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        footer {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 3rem 1rem;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--star-color), var(--highlight-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+
+        .footer-nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .footer-nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-nav a:hover {
+            color: var(--highlight-color);
+        }
+
+        .copyright {
+            margin-top: 2rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        /* Efeito de partículas estelares */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background-color: var(--star-color);
+            border-radius: 50%;
+            animation: twinkle 5s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 0.2;
+                transform: scale(0.8);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+        }
+
+        .nav-button {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-button:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul {
+                gap: 1rem;
+                margin-top: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .step-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .data-tools {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Efeito de estrelas -->
+    <div class="stars" id="stars"></div>
+
+    <header>
+        <div class="nav-container">
+            <div class="logo">Prisma Arena - Aula 8</div>
+            <nav>
+                <ul>
+                    <li><a href="#inicio">Início</a></li>
+                    <li><a href="#recursos">Recursos</a></li>
+                    <li><a href="#demo">Demonstração</a></li>
+                    <li><a href="#tutorial">Tutorial</a></li>
+                    <li><a href="index.html">Voltar ao Menu</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero" id="inicio">
+        <h1>Manipulação de Dados na Era Estelar</h1>
+        <p>Nesta aula, você aprenderá técnicas avançadas para ordenar, filtrar e organizar grandes conjuntos de dados. Domine o uso de filtros automáticos e ferramentas de ordenação para encontrar rapidamente as informações que você precisa e transformar dados brutos em insights valiosos.</p>
+        <button class="cta-button">Começar a Explorar</button>
+    </section>
+
+    <section class="content-section" id="recursos">
+        <h2 class="section-title">Recursos Estelares</h2>
+        <div class="grid-container">
+            <div class="feature-card">
+                <div class="feature-icon">↕️</div>
+                <h3>Ordenação de Dados</h3>
+                <p>Aprenda a organizar seus dados em ordem crescente ou decrescente com base em uma ou múltiplas colunas para facilitar a análise e visualização de padrões.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔍</div>
+                <h3>Filtros Automáticos</h3>
+                <p>Domine o uso de filtros automáticos para exibir apenas os dados que atendem a critérios específicos, permitindo análises focadas e personalizadas.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔢</div>
+                <h3>Filtros Numéricos</h3>
+                <p>Explore opções avançadas de filtragem para valores numéricos, incluindo filtros para valores maiores, menores, entre intervalos ou acima da média.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📅</div>
+                <h3>Filtros de Data</h3>
+                <p>Descubra como filtrar dados por períodos específicos, como mês, trimestre ou intervalo personalizado, ideal para análises temporais e de tendências.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Formatação Condicional</h3>
+                <p>Combine técnicas de formatação condicional com filtros e ordenação para destacar visualmente informações importantes em grandes conjuntos de dados.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⚡</div>
+                <h3>Atalhos e Dicas</h3>
+                <p>Aprenda atalhos e técnicas avançadas para aumentar significativamente sua produtividade ao trabalhar com grandes volumes de informação no Excel.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="demo-section" id="demo">
+        <h2 class="section-title">Demonstração Interativa</h2>
+        <p>Experimente as funcionalidades de ordenação e filtragem nesta demonstração interativa. Use as ferramentas abaixo para organizar e filtrar os dados da tabela de vendas.</p>
+        
+        <div class="data-tools">
+            <div class="filter-section">
+                <div class="tool-title">Filtrar Dados</div>
+                
+                <div class="filter-row">
+                    <div class="filter-label">Coluna:</div>
+                    <select id="filter-column" class="filter-select">
+                        <option value="produto">Produto</option>
+                        <option value="categoria">Categoria</option>
+                        <option value="vendas">Vendas</option>
+                        <option value="estoque">Estoque</option>
+                        <option value="data">Data</option>
+                    </select>
+                </div>
+                
+                <div class="filter-row">
+                    <div class="filter-label">Condição:</div>
+                    <select id="filter-condition" class="filter-select">
+                        <option value="contains">Contém</option>
+                        <option value="equals">Igual a</option>
+                        <option value="starts">Começa com</option>
+                        <option value="greater">Maior que</option>
+                        <option value="less">Menor que</option>
+                        <option value="between">Entre</option>
+                    </select>
+                </div>
+                
+                <div class="filter-row">
+                    <div class="filter-label">Valor:</div>
+                    <input type="text" id="filter-value" class="filter-input" placeholder="Digite o valor...">
+                </div>
+                
+                <div id="filter-value2-container" class="filter-row" style="display: none;">
+                    <div class="filter-label">Até:</div>
+                    <input type="text" id="filter-value2" class="filter-input" placeholder="Valor final...">
+                </div>
+                
+                <button id="apply-filter" class="filter-button">Aplicar Filtro</button>
+                <button id="clear-filter" class="filter-button" style="background-color: #44173e;">Limpar Filtros</button>
+            </div>
+            
+            <div class="sort-section">
+                <div class="tool-title">Ordenar Dados</div>
+                
+                <div class="sort-options">
+                    <label class="sort-option">
+                        <input type="radio" name="sort-option" value="product-asc" class="sort-radio">
+                        <span class="sort-name">Produto (A-Z)</span>
+                        <span class="sort-desc">Ordena por nome do produto em ordem alfabética</span>
+                    </label>
+                    
+                    <label class="sort-option">
+                        <input type="radio" name="sort-option" value="product-desc" class="sort-radio">
+                        <span class="sort-name">Produto (Z-A)</span>
+                        <span class="sort-desc">Ordena por nome do produto em ordem reversa</span>
+                    </label>
+                    
+                    <label class="sort-option">
+                        <input type="radio" name="sort-option" value="sales-high" class="sort-radio">
+                        <span class="sort-name">Vendas (Maior-Menor)</span>
+                        <span class="sort-desc">Produtos com maior volume de vendas primeiro</span>
+                    </label>
+                    
+                    <label class="sort-option">
+                        <input type="radio" name="sort-option" value="sales-low" class="sort-radio">
+                        <span class="sort-name">Vendas (Menor-Maior)</span>
+                        <span class="sort-desc">Produtos com menor volume de vendas primeiro</span>
+                    </label>
+                    
+                    <label class="sort-option">
+                        <input type="radio" name="sort-option" value="date-new" class="sort-radio">
+                        <span class="sort-name">Data (Mais Recente)</span>
+                        <span class="sort-desc">Registros mais recentes primeiro</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <div id="filtered-status" class="filtered-status">
+            Exibindo 5 de 10 registros
+        </div>
+        
+        <div class="spreadsheet-demo">
+            <table id="data-table">
+                <thead>
+                    <tr>
+                        <th>Produto</th>
+                        <th>Categoria</th>
+                        <th>Vendas</th>
+                        <th>Estoque</th>
+                        <th>Data</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Processador Quântico X9</td>
+                        <td>Hardware</td>
+                        <td>1250</td>
+                        <td>45</td>
+                        <td>15/01/2025</td>
+                    </tr>
+                    <tr>
+                        <td>Visor Holográfico V3</td>
+                        <td>Periférico</td>
+                        <td>870</td>
+                        <td>23</td>
+                        <td>05/02/2025</td>
+                    </tr>
+                    <tr>
+                        <td>Módulo Neural Adaptativo</td>
+                        <td>Hardware</td>
+                        <td>1560</td>
+                        <td>12</td>
+                        <td>22/01/2025</td>
+                    </tr>
+                    <tr>
+                        <td>Software Prisma Cloud</td>
+                        <td>Software</td>
+                        <td>2800</td>
+                        <td>Ilimitado</td>
+                        <td>10/02/2025</td>
+                    </tr>
+                    <tr>
+                        <td>Console Estelar Pro</td>
+                        <td>Hardware</td>
+                        <td>985</td>
+                        <td>38</td>
+                        <td>30/01/2025</td>
+                    </tr>
+                    <tr>
+                        <td>Licença Enterprise</td>
+                        <td>Software</td>
+                        <td>1875</td>
+                        <td>Ilimitado</td>
+                        <td>04/03/2025</td>
+                    </tr>
+                    <tr>
+                        <td>Sensor Biomimético</td>
+                        <td>Periférico</td>
+                        <td>650</td>
+                        <td>56</td>
+                        <td>18/02/2025</td>
+                    </tr>
+                    <tr>
+                        <td>Luvas Hápticas Gen2</td>
+                        <td>Periférico</td>
+                        <td>1230</td>
+                        <td>19</td>
+                        <td>07/03/2025</td>
+                    </tr>
+                    <tr>
+                        <td>Sistema Operacional Nova</td>
+                        <td>Software</td>
+                        <td>3450</td>
+                        <td>Ilimitado</td>
+                        <td>15/02/2025</td>
+                    </tr>
+                    <tr>
+                        <td>Kit Desenvolvimento VR</td>
+                        <td>Hardware</td>
+                        <td>725</td>
+                        <td>27</td>
+                        <td>25/02/2025</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="controls">
+            <button class="control-button" id="reset-table">Resetar Tabela</button>
+            <button class="control-button" id="highlight-low-stock">Destacar Baixo Estoque</button>
+            <button class="control-button" id="highlight-high-sales">Destacar Altas Vendas</button>
+        </div>
+    </section>
+
+    <section class="content-section" id="tutorial">
+        <h2 class="section-title">Tutorial Passo a Passo</h2>
+        
+        <div class="tutorial-steps">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>Ordenação Básica de Dados</h3>
+                    <p>A ordenação é uma das operações mais fundamentais para organizar e analisar dados no Excel. Para ordenar uma coluna, selecione qualquer célula dentro da coluna e clique em um dos botões de ordenação na guia <span class="keyboard-shortcut">Dados</span>: <span class="keyboard-shortcut">Classificar de A a Z</span> (ordenação crescente) ou <span class="keyboard-shortcut">Classificar de Z a A</span> (ordenação decrescente). Você também pode clicar na seta de menu suspenso no cabeçalho da coluna (quando o filtro automático está ativado) e escolher a opção de ordenação desejada. O Excel automaticamente detecta se a sua coluna contém texto, números ou datas, e aplica a ordenação apropriada. Para ordenações mais avançadas, como manter registros relacionados juntos durante a ordenação, certifique-se de selecionar toda a área de dados antes de ordenar.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Ordenação por Múltiplos Critérios</h3>
+                    <p>O Excel permite ordenar seus dados com base em múltiplas colunas, o que é útil quando você tem valores duplicados na primeira coluna de ordenação. Para isso, selecione os dados e vá para <span class="keyboard-shortcut">Dados > Classificar</span>. Na caixa de diálogo que aparece, você pode adicionar níveis de ordenação clicando no botão "Adicionar Nível". Para cada nível, especifique: a coluna para ordenar, o tipo de dados (valores, cores de célula, cores de fonte) e a ordem (crescente ou decrescente). Por exemplo, você pode ordenar primeiro por Categoria (A-Z), depois por Vendas (Maior-Menor) dentro de cada categoria. A ordem dos níveis é importante: o Excel aplica o primeiro nível, depois o segundo para quaisquer valores duplicados no primeiro nível, e assim por diante. Use os botões para mover níveis para cima/baixo se precisar alterar a precedência.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Ativando e Usando Filtros Automáticos</h3>
+                    <p>Os filtros automáticos permitem exibir apenas os dados que atendem a critérios específicos. Para ativar, selecione uma célula na tabela de dados e vá para <span class="keyboard-shortcut">Dados > Filtro</span> ou use o atalho <span class="keyboard-shortcut">Ctrl+Shift+L</span>. Setas de menu suspenso aparecerão em cada cabeçalho de coluna. Ao clicar em uma seta, você verá opções para filtrar essa coluna. Para filtros simples, você pode marcar ou desmarcar valores específicos na lista. Por exemplo, você pode mostrar apenas produtos da categoria "Hardware" desmarcando todas as outras categorias. As opções de filtro variam dependendo do tipo de dados na coluna: filtros de texto para colunas de texto, filtros numéricos para colunas numéricas e filtros de data para colunas de data. Quando um filtro está aplicado, a seta do menu suspenso muda para um ícone de filtro, indicando que há um filtro ativo nessa coluna.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h3>Filtros Avançados</h3>
+                    <p>Além dos filtros básicos por valor, o Excel oferece filtros avançados para cada tipo de dados. Para <span class="keyboard-shortcut">filtros de texto</span>, você pode usar condições como "Começa com", "Termina com", "Contém" ou "Não contém". Por exemplo, você pode mostrar todos os produtos que contêm a palavra "Quântico". Para <span class="keyboard-shortcut">filtros numéricos</span>, as opções incluem "Maior que", "Menor que", "Entre" e filtros específicos como "Acima da média" ou "10 principais". Por exemplo, você pode mostrar apenas produtos com vendas superiores a 1000 unidades. Para <span class="keyboard-shortcut">filtros de data</span>, você pode filtrar por períodos como "Hoje", "Esta semana", "Este mês", ou intervalos personalizados. O Excel também oferece <span class="keyboard-shortcut">Filtro por Cor</span> se você usou formatação condicional ou coloriu manualmente células. Para critérios realmente complexos, você pode usar <span class="keyboard-shortcut">Dados > Filtro Avançado</span>, que permite definir condições de filtro em uma área separada da planilha.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                    <h3>Combinando Filtros e Formatação Condicional</h3>
+                    <p>A combinação de filtros com formatação condicional cria uma poderosa ferramenta de análise visual. Primeiro, aplique <span class="keyboard-shortcut">formatação condicional</span> (via guia Página Inicial) para destacar visualmente informações importantes, como vendas acima da meta, produtos com estoque baixo ou datas próximas de vencimento. Em seguida, use filtros para focar em subconjuntos específicos dos dados destacados. Por exemplo, você pode criar uma regra de formatação condicional que destaca produtos com estoque abaixo de 20 unidades em vermelho, e depois filtrar para mostrar apenas produtos da categoria "Hardware". Isso permite identificar rapidamente quais produtos de hardware precisam de reabastecimento. Alternativamente, você pode usar <span class="keyboard-shortcut">Filtro por Cor</span> para mostrar apenas itens que foram destacados pela formatação condicional, criando um poderoso sistema de alerta visual.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">6</div>
+                <div class="step-content">
+                    <h3>Dicas e Truques para Manipulação Eficiente</h3>
+                    <p>Para maximizar sua eficiência ao trabalhar com grandes conjuntos de dados, considere estas técnicas avançadas: Use <span class="keyboard-shortcut">Ctrl+Shift+L</span> para alternar rapidamente o filtro automático; pressione <span class="keyboard-shortcut">Alt+↓</span> em um cabeçalho filtrado para abrir o menu de filtro; utilize <span class="keyboard-shortcut">Tabelas do Excel</span> (Inserir > Tabela) para ter filtros automáticos permanentes que se ajustam automaticamente quando novos dados são adicionados; aplique <span class="keyboard-shortcut">Formato como Tabela</span> para obter estilos predefinidos com cabeçalhos congelados e filtros; utilize <span class="keyboard-shortcut">Segmentação de Dados</span> (guia Inserir) para criar controles de filtro visuais e interativos; aprenda a usar <span class="keyboard-shortcut">Subtotais Automáticos</span> (Dados > Subtotal) para resumir dados filtrados; e salve visualizações de filtro comuns com <span class="keyboard-shortcut">Exibições Personalizadas</span> (Exibir > Exibições Personalizadas). Essas técnicas avançadas transformarão a maneira como você analisa e manipula dados no Excel.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="data-tips">
+            <div class="tips-title">Dicas de Especialista</div>
+            <div class="tips-list">
+                <div class="tip-item">
+                    <div class="tip-icon">💡</div>
+                    <div class="tip-text">Use Alt+Seta para Baixo em uma coluna filtrada para abrir rapidamente o menu de filtro sem usar o mouse.</div>
+                </div>
+                <div class="tip-item">
+                    <div class="tip-icon">💡</div>
+                    <div class="tip-text">Pressione Ctrl+Shift+L duas vezes para remover todos os filtros e depois reativá-los, criando um "reset" rápido.</div>
+                </div>
+                <div class="tip-item">
+                    <div class="tip-icon">💡</div>
+                    <div class="tip-text">Crie uma tabela do Excel (Ctrl+T) para ter filtros automáticos que se expandem com seus dados.</div>
+                </div>
+                <div class="tip-item">
+                    <div class="tip-icon">💡</div>
+                    <div class="tip-text">Clique com o botão direito em um cabeçalho de coluna e escolha "Filtro" para ativar o filtro apenas nessa coluna.</div>
+                </div>
+                <div class="tip-item">
+                    <div class="tip-icon">💡</div>
+                    <div class="tip-text">Aplique ordenação personalizada (como dia da semana ou mês) usando a opção "Lista Personalizada" na caixa de diálogo Classificar.</div>
+                </div>
+                <div class="tip-item">
+                    <div class="tip-icon">💡</div>
+                    <div class="tip-text">Aprenda a combinar "Filtrar por Seleção" clicando com o botão direito em um valor de célula específico e escolhendo "Filtrar".</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="navigation-buttons">
+            <button class="nav-button previous">← Aula Anterior</button>
+            <button class="nav-button next">Próxima Aula →</button>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">Prisma Arena - Aula 8</div>
+            <p>Explorando o universo do Excel com tecnologia estelar</p>
+            <div class="footer-nav">
+                <a href="#inicio">Início</a>
+                <a href="#recursos">Recursos</a>
+                <a href="#demo">Demonstração</a>
+                <a href="#tutorial">Tutorial</a>
+                <a href="index.html">Menu Principal</a>
+            </div>
+            <p class="copyright">© 2025 Prisma Arena. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Criar efeito de estrelas
+        document.addEventListener('DOMContentLoaded', function() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 100;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                star.style.width = `${Math.random() * 3 + 1}px`;
+                star.style.height = star.style.width;
+                starsContainer.appendChild(star);
+            }
+
+            // Variáveis para a demonstração
+            const table = document.getElementById('data-table');
+            const filteredStatus = document.getElementById('filtered-status');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            const totalRows = rows.length;
+            
+            // Controles de filtro
+            const filterColumn = document.getElementById('filter-column');
+            const filterCondition = document.getElementById('filter-condition');
+            const filterValue = document.getElementById('filter-value');
+            const filterValue2 = document.getElementById('filter-value2');
+            const filterValue2Container = document.getElementById('filter-value2-container');
+            
+            // Mostrar/ocultar o segundo campo de valor para condição "Entre"
+            filterCondition.addEventListener('change', function() {
+                if (this.value === 'between') {
+                    filterValue2Container.style.display = 'flex';
+                } else {
+                    filterValue2Container.style.display = 'none';
+                }
+            });
+            
+            // Aplicar filtro
+            document.getElementById('apply-filter').addEventListener('click', function() {
+                const column = filterColumn.value;
+                const condition = filterCondition.value;
+                const value = filterValue.value.trim().toLowerCase();
+                const value2 = filterValue2.value.trim().toLowerCase();
+                
+                if (!value) {
+                    alert("Por favor, insira um valor para filtrar.");
+                    return;
+                }
+                
+                // Determinar o índice da coluna
+                let columnIndex;
+                switch (column) {
+                    case 'produto': columnIndex = 0; break;
+                    case 'categoria': columnIndex = 1; break;
+                    case 'vendas': columnIndex = 2; break;
+                    case 'estoque': columnIndex = 3; break;
+                    case 'data': columnIndex = 4; break;
+                }
+                
+                let visibleRows = 0;
+                
+                // Aplicar filtro a cada linha
+                rows.forEach(row => {
+                    const cell = row.cells[columnIndex];
+                    const cellText = cell.textContent.toLowerCase();
+                    let matches = false;
+                    
+                    // Verificar se atende à condição
+                    switch (condition) {
+                        case 'contains':
+                            matches = cellText.includes(value);
+                            break;
+                        case 'equals':
+                            matches = cellText === value;
+                            break;
+                        case 'starts':
+                            matches = cellText.startsWith(value);
+                            break;
+                        case 'greater':
+                            // Para colunas numéricas
+                            if (columnIndex === 2 || columnIndex === 3) {
+                                const numValue = parseFloat(value);
+                                const cellValue = parseFloat(cellText.replace(/[^\d.-]/g, ''));
+                                matches = !isNaN(cellValue) && !isNaN(numValue) && cellValue > numValue;
+                            }
+                            break;
+                        case 'less':
+                            // Para colunas numéricas
+                            if (columnIndex === 2 || columnIndex === 3) {
+                                const numValue = parseFloat(value);
+                                const cellValue = parseFloat(cellText.replace(/[^\d.-]/g, ''));
+                                matches = !isNaN(cellValue) && !isNaN(numValue) && cellValue < numValue;
+                            }
+                            break;
+                        case 'between':
+                            // Para colunas numéricas
+                            if (columnIndex === 2 || columnIndex === 3) {
+                                const minValue = parseFloat(value);
+                                const maxValue = parseFloat(value2);
+                                const cellValue = parseFloat(cellText.replace(/[^\d.-]/g, ''));
+                                matches = !isNaN(cellValue) && !isNaN(minValue) && !isNaN(maxValue) && 
+                                         cellValue >= minValue && cellValue <= maxValue;
+                            }
+                            break;
+                    }
+                    
+                    // Mostrar/ocultar a linha conforme o resultado
+                    if (matches) {
+                        row.classList.remove('hidden-row');
+                        visibleRows++;
+                    } else {
+                        row.classList.add('hidden-row');
+                    }
+                });
+                
+                // Atualizar status do filtro
+                filteredStatus.textContent = `Exibindo ${visibleRows} de ${totalRows} registros`;
+                filteredStatus.style.display = 'block';
+            });
+            
+            // Limpar filtros
+            document.getElementById('clear-filter').addEventListener('click', function() {
+                rows.forEach(row => {
+                    row.classList.remove('hidden-row');
+                });
+                
+                filterValue.value = '';
+                filterValue2.value = '';
+                filterValue2Container.style.display = 'none';
+                
+                filteredStatus.style.display = 'none';
+            });
+            
+            // Ordenação
+            const sortOptions = document.querySelectorAll('input[name="sort-option"]');
+            
+            sortOptions.forEach(option => {
+                option.addEventListener('change', function() {
+                    if (this.checked) {
+                        const sortValue = this.value;
+                        
+                        // Limpar qualquer filtro de linha oculta antes de ordenar
+                        rows.forEach(row => {
+                            row.classList.remove('hidden-row');
+                        });
+                        
+                        // Clone do array de linhas para ordenação
+                        const sortedRows = [...rows];
+                        
+                        // Ordenar com base na opção selecionada
+                        switch (sortValue) {
+                            case 'product-asc':
+                                sortedRows.sort((a, b) => {
+                                    return a.cells[0].textContent.localeCompare(b.cells[0].textContent);
+                                });
+                                break;
+                            case 'product-desc':
+                                sortedRows.sort((a, b) => {
+                                    return b.cells[0].textContent.localeCompare(a.cells[0].textContent);
+                                });
+                                break;
+                            case 'sales-high':
+                                sortedRows.sort((a, b) => {
+                                    return parseFloat(b.cells[2].textContent) - parseFloat(a.cells[2].textContent);
+                                });
+                                break;
+                            case 'sales-low':
+                                sortedRows.sort((a, b) => {
+                                    return parseFloat(a.cells[2].textContent) - parseFloat(b.cells[2].textContent);
+                                });
+                                break;
+                            case 'date-new':
+                                sortedRows.sort((a, b) => {
+                                    const dateA = a.cells[4].textContent.split('/').reverse().join('');
+                                    const dateB = b.cells[4].textContent.split('/').reverse().join('');
+                                    return dateB.localeCompare(dateA);
+                                });
+                                break;
+                        }
+                        
+                        // Reordenar as linhas no DOM
+                        sortedRows.forEach(row => {
+                            tbody.appendChild(row);
+                        });
+                    }
+                });
+            });
+            
+            // Destacamentos
+            document.getElementById('highlight-low-stock').addEventListener('click', function() {
+                rows.forEach(row => {
+                    const stockCell = row.cells[3];
+                    const stockValue = stockCell.textContent;
+                    
+                    // Verificar se o estoque é numérico e abaixo de 30
+                    if (stockValue !== 'Ilimitado') {
+                        const stock = parseInt(stockValue);
+                        if (stock < 30) {
+                            stockCell.style.backgroundColor = 'rgba(255, 105, 97, 0.3)';
+                            stockCell.style.color = '#ff6961';
+                            stockCell.style.fontWeight = 'bold';
+                        }
+                    }
+                });
+                
+                alert('Produtos com estoque abaixo de 30 unidades destacados em vermelho!');
+            });
+            
+            document.getElementById('highlight-high-sales').addEventListener('click', function() {
+                // Primeiro, encontre a média de vendas
+                let total = 0;
+                let count = 0;
+                
+                rows.forEach(row => {
+                    const salesValue = parseInt(row.cells[2].textContent);
+                    total += salesValue;
+                    count++;
+                });
+                
+                const average = total / count;
+                
+                // Destaque vendas acima da média
+                rows.forEach(row => {
+                    const salesCell = row.cells[2];
+                    const salesValue = parseInt(salesCell.textContent);
+                    
+                    if (salesValue > average) {
+                        salesCell.style.backgroundColor = 'rgba(152, 251, 152, 0.3)';
+                        salesCell.style.color = '#58D68D';
+                        salesCell.style.fontWeight = 'bold';
+                    }
+                });
+                
+                alert(`Produtos com vendas acima da média (${Math.round(average)} unidades) destacados em verde!`);
+            });
+            
+            // Resetar tabela
+            document.getElementById('reset-table').addEventListener('click', function() {
+                location.reload();
+            });
+            
+            // Ordenação ao clicar nos cabeçalhos da tabela
+            const headers = table.querySelectorAll('th');
+            
+            headers.forEach((header, index) => {
+                header.addEventListener('click', function() {
+                    // Simular alternância entre ordenação crescente e decrescente
+                    const isAscending = !this.classList.contains('sorted-asc');
+                    
+                    // Remover classes de ordenação de todos os cabeçalhos
+                    headers.forEach(h => {
+                        h.classList.remove('sorted-asc', 'sorted-desc');
+                    });
+                    
+                    // Adicionar classe de ordenação ao cabeçalho clicado
+                    this.classList.add(isAscending ? 'sorted-asc' : 'sorted-desc');
+                    
+                    // Ordenar dados
+                    const sortedRows = [...rows];
+                    
+                    sortedRows.sort((a, b) => {
+                        let valueA = a.cells[index].textContent;
+                        let valueB = b.cells[index].textContent;
+                        
+                        // Tentar ordenação numérica para colunas 2 e 3 (Vendas e Estoque)
+                        if (index === 2) {
+                            valueA = parseFloat(valueA);
+                            valueB = parseFloat(valueB);
+                            return isAscending ? valueA - valueB : valueB - valueA;
+                        } 
+                        // Tratamento especial para estoque que pode ter "Ilimitado"
+                        else if (index === 3) {
+                            if (valueA === 'Ilimitado') valueA = Infinity;
+                            else valueA = parseFloat(valueA);
+                            
+                            if (valueB === 'Ilimitado') valueB = Infinity;
+                            else valueB = parseFloat(valueB);
+                            
+                            return isAscending ? valueA - valueB : valueB - valueA;
+                        }
+                        // Ordenação de data
+                        else if (index === 4) {
+                            const dateA = valueA.split('/').reverse().join('');
+                            const dateB = valueB.split('/').reverse().join('');
+                            return isAscending ? dateA.localeCompare(dateB) : dateB.localeCompare(dateA);
+                        }
+                        // Ordenação de texto
+                        else {
+                            return isAscending ? 
+                                valueA.localeCompare(valueB) : 
+                                valueB.localeCompare(valueA);
+                        }
+                    });
+                    
+                    // Reordenar as linhas no DOM
+                    sortedRows.forEach(row => {
+                        tbody.appendChild(row);
+                    });
+                });
+            });
+            
+            // Manipulador para os botões de navegação
+            document.querySelector('.previous').addEventListener('click', function() {
+                window.location.href = 'aula7_travamento_formula.html';
+            });
+            
+            document.querySelector('.next').addEventListener('click', function() {
+                window.location.href = 'aula9_graficos.html';
+            });
+            
+            // Adicionar smooth scroll para navegação
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+            
+            // Animação para o botão CTA
+            document.querySelector('.cta-button').addEventListener('click', function() {
+                document.querySelector('#recursos').scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

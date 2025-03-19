@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prisma Arena - Aula 5: Funções Básicas</title>
+    <style>
+        :root {
+            --primary-color: #2e0259;
+            --secondary-color: #5727a3;
+            --accent-color: #9152e0;
+            --highlight-color: #bf7af0;
+            --star-color: #f5c6ff;
+            --text-color: #ffffff;
+            --dark-bg: #0a0118;
+            --cell-border: #5727a3;
+            --grid-bg: rgba(15, 3, 40, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(145, 82, 224, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 70% 60%, rgba(191, 122, 240, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 40% 80%, rgba(245, 198, 255, 0.08) 0%, transparent 20%);
+            overflow-x: hidden;
+        }
+
+        header {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(145, 82, 224, 0.5);
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--star-color), var(--highlight-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(245, 198, 255, 0.3);
+            display: flex;
+            align-items: center;
+        }
+
+        .logo::before {
+            content: "✧";
+            margin-right: 0.5rem;
+            font-size: 1.8rem;
+            -webkit-text-fill-color: var(--star-color);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--highlight-color);
+            transition: width 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--highlight-color);
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4rem 1rem;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, var(--accent-color), var(--highlight-color), var(--star-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            max-width: 700px;
+            margin-bottom: 2.5rem;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #d8c3e9;
+        }
+
+        .cta-button {
+            background: linear-gradient(45deg, var(--accent-color), var(--highlight-color));
+            color: var(--text-color);
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(145, 82, 224, 0.5);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(145, 82, 224, 0.7);
+        }
+
+        .content-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 1rem;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 2.5rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: "";
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(to right, var(--accent-color), var(--highlight-color));
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .feature-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(145, 82, 224, 0.1), rgba(191, 122, 240, 0.1));
+            z-index: -1;
+            transform: translateY(100%);
+            transition: transform 0.5s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(145, 82, 224, 0.3);
+        }
+
+        .feature-card:hover::before {
+            transform: translateY(0);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--highlight-color);
+        }
+
+        .feature-card h3 {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            color: var(--highlight-color);
+        }
+
+        .feature-card p {
+            color: #d8c3e9;
+            line-height: 1.5;
+        }
+
+        .demo-section {
+            background: var(--grid-bg);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 4rem auto;
+            max-width: 1000px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--secondary-color);
+        }
+
+        .function-input {
+            background-color: rgba(46, 2, 89, 0.5);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+            border: 1px solid var(--accent-color);
+        }
+        
+        .function-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            flex-grow: 1;
+        }
+        
+        .function-label {
+            font-weight: bold;
+            color: var(--star-color);
+            min-width: 80px;
+        }
+        
+        .function-select {
+            background-color: rgba(10, 1, 24, 0.7);
+            border: 1px solid var(--secondary-color);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 4px;
+            min-width: 120px;
+        }
+        
+        .function-field {
+            flex-grow: 1;
+            background-color: rgba(10, 1, 24, 0.7);
+            border: 1px solid var(--secondary-color);
+            color: white;
+            padding: 0.8rem;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        .function-button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .function-button:hover {
+            background-color: var(--accent-color);
+        }
+
+        .function-result {
+            margin-top: 1rem;
+            background-color: rgba(46, 2, 89, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            border: 1px dashed var(--accent-color);
+            font-family: monospace;
+            color: var(--highlight-color);
+            display: none;
+        }
+
+        .spreadsheet-demo {
+            overflow-x: auto;
+            margin-top: 2rem;
+            background-color: rgba(10, 1, 24, 0.7);
+            border-radius: 8px;
+            border: 1px solid var(--secondary-color);
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 800px;
+        }
+
+        th, td {
+            border: 1px solid var(--cell-border);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: rgba(87, 39, 163, 0.1);
+        }
+
+        tr:hover {
+            background-color: rgba(145, 82, 224, 0.2);
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .control-button {
+            background: var(--primary-color);
+            color: var(--text-color);
+            border: 1px solid var(--accent-color);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .selected-range {
+            background-color: rgba(191, 122, 240, 0.3) !important;
+        }
+
+        .tutorial-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .step-card {
+            background: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 10px;
+            padding: 2rem;
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .step-content h3 {
+            margin-bottom: 1rem;
+            color: var(--highlight-color);
+        }
+
+        .step-content p {
+            color: #d8c3e9;
+            line-height: 1.6;
+        }
+
+        .keyboard-shortcut {
+            display: inline-block;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            margin: 0 0.2rem;
+        }
+
+        .function-examples {
+            margin-top: 2rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .function-card {
+            background-color: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 8px;
+            padding: 1rem;
+            transition: transform 0.3s;
+        }
+        
+        .function-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(145, 82, 224, 0.3);
+        }
+        
+        .function-title {
+            color: var(--highlight-color);
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+        }
+        
+        .function-syntax {
+            font-family: monospace;
+            background-color: rgba(10, 1, 24, 0.6);
+            padding: 0.5rem;
+            border-radius: 4px;
+            color: var(--star-color);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .function-description {
+            color: #d8c3e9;
+            font-size: 0.9rem;
+        }
+
+        footer {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 3rem 1rem;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--star-color), var(--highlight-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+
+        .footer-nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .footer-nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-nav a:hover {
+            color: var(--highlight-color);
+        }
+
+        .copyright {
+            margin-top: 2rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        /* Efeito de partículas estelares */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background-color: var(--star-color);
+            border-radius: 50%;
+            animation: twinkle 5s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 0.2;
+                transform: scale(0.8);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+        }
+
+        .nav-button {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-button:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul {
+                gap: 1rem;
+                margin-top: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .step-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .controls {
+                justify-content: center;
+            }
+
+            .function-input {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .function-group {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Efeito de estrelas -->
+    <div class="stars" id="stars"></div>
+
+    <header>
+        <div class="nav-container">
+            <div class="logo">Prisma Arena - Aula 5</div>
+            <nav>
+                <ul>
+                    <li><a href="#inicio">Início</a></li>
+                    <li><a href="#recursos">Recursos</a></li>
+                    <li><a href="#demo">Demonstração</a></li>
+                    <li><a href="#tutorial">Tutorial</a></li>
+                    <li><a href="index.html">Voltar ao Menu</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero" id="inicio">
+        <h1>Funções Básicas na Era Estelar</h1>
+        <p>Nesta aula, você ampliará seu domínio do Excel através das funções predefinidas. Explore as funções essenciais como SOMA, MÉDIA, MÍNIMO, MÁXIMO e CONT.SE para realizar análises eficientes e extrair insights valiosos dos seus dados com facilidade.</p>
+        <button class="cta-button">Começar a Explorar</button>
+    </section>
+
+    <section class="content-section" id="recursos">
+        <h2 class="section-title">Recursos Estelares</h2>
+        <div class="grid-container">
+            <div class="feature-card">
+                <div class="feature-icon">∑</div>
+                <h3>Função SOMA</h3>
+                <p>Domine a função fundamental para adicionar valores numéricos em células individuais, intervalos contíguos ou não contíguos, permitindo cálculos rápidos de totais em suas planilhas.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">x̄</div>
+                <h3>Função MÉDIA</h3>
+                <p>Calcule a média aritmética de seus dados com esta função versátil, identificando facilmente valores centrais em suas distribuições numéricas para análises estatísticas.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">↓</div>
+                <h3>Função MÍNIMO</h3>
+                <p>Encontre rapidamente o menor valor em um conjunto de dados, permitindo identificar limites inferiores e pontos de referência importantes em suas análises.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">↑</div>
+                <h3>Função MÁXIMO</h3>
+                <p>Identifique o maior valor em uma seleção de células, facilitando a detecção de picos, recordes e valores extremos em seus conjuntos de dados.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔢</div>
+                <h3>Função CONT.SE</h3>
+                <p>Realize contagens seletivas com base em critérios específicos, permitindo análises quantitativas mais precisas e focadas em subconjuntos relevantes dos seus dados.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔄</div>
+                <h3>Funções Aninhadas</h3>
+                <p>Explore o poder de combinar múltiplas funções dentro de uma única fórmula para criar cálculos complexos e resolver problemas sofisticados de análise de dados.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="demo-section" id="demo">
+        <h2 class="section-title">Demonstração Interativa</h2>
+        <p>Experimente a aplicação de funções básicas nesta demonstração interativa. Selecione um intervalo de células na tabela e aplique as diferentes funções para ver os resultados em tempo real.</p>
+        
+        <div class="function-input">
+            <div class="function-group">
+                <div class="function-label">Função:</div>
+                <select id="function-select" class="function-select">
+                    <option value="SOMA">SOMA</option>
+                    <option value="MÉDIA">MÉDIA</option>
+                    <option value="MÍNIMO">MÍNIMO</option>
+                    <option value="MÁXIMO">MÁXIMO</option>
+                    <option value="CONT.SE">CONT.SE</option>
+                </select>
+            </div>
+            
+            <div class="function-group" id="contse-params" style="display: none;">
+                <div class="function-label">Critério:</div>
+                <input type="text" id="criteria-field" class="function-field" placeholder="Ex: >100">
+            </div>
+            
+            <button id="apply-function" class="function-button">Aplicar</button>
+        </div>
+        
+        <div id="function-result" class="function-result">
+            Resultado: <span id="result-value"></span>
+        </div>
+        
+        <div class="controls">
+            <button class="control-button" id="select-range-btn">Selecionar Intervalo</button>
+            <button class="control-button" id="clear-selection-btn">Limpar Seleção</button>
+            <button class="control-button" id="reset-data-btn">Resetar Dados</button>
+            <button class="control-button" id="populate-data-btn">Popultar com Dados de Exemplo</button>
+        </div>
+        
+        <div class="spreadsheet-demo">
+            <table id="data-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>A</th>
+                        <th>B</th>
+                        <th>C</th>
+                        <th>D</th>
+                        <th>E</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Produto</td>
+                        <td>Região</td>
+                        <td>Quantidade</td>
+                        <td>Preço Unit.</td>
+                        <td>Total</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Processador Quântico</td>
+                        <td>Norte</td>
+                        <td>120</td>
+                        <td>1250</td>
+                        <td>150000</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Tela Holográfica</td>
+                        <td>Sul</td>
+                        <td>85</td>
+                        <td>1800</td>
+                        <td>153000</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Console Estelar</td>
+                        <td>Leste</td>
+                        <td>200</td>
+                        <td>950</td>
+                        <td>190000</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td>Módulo AI</td>
+                        <td>Oeste</td>
+                        <td>150</td>
+                        <td>1100</td>
+                        <td>165000</td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td>Visor Neural</td>
+                        <td>Norte</td>
+                        <td>95</td>
+                        <td>750</td>
+                        <td>71250</td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td>Totais</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td>Estatísticas</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="function-examples">
+            <div class="function-card">
+                <div class="function-title">SOMA</div>
+                <div class="function-syntax">=SOMA(C2:C6)</div>
+                <div class="function-description">Soma todos os valores no intervalo especificado.</div>
+            </div>
+            <div class="function-card">
+                <div class="function-title">MÉDIA</div>
+                <div class="function-syntax">=MÉDIA(D2:D6)</div>
+                <div class="function-description">Calcula a média dos valores no intervalo.</div>
+            </div>
+            <div class="function-card">
+                <div class="function-title">MÍNIMO</div>
+                <div class="function-syntax">=MÍNIMO(E2:E6)</div>
+                <div class="function-description">Encontra o menor valor no intervalo.</div>
+            </div>
+            <div class="function-card">
+                <div class="function-title">MÁXIMO</div>
+                <div class="function-syntax">=MÁXIMO(E2:E6)</div>
+                <div class="function-description">Encontra o maior valor no intervalo.</div>
+            </div>
+            <div class="function-card">
+                <div class="function-title">CONT.SE</div>
+                <div class="function-syntax">=CONT.SE(E2:E6;">100000")</div>
+                <div class="function-description">Conta células que atendem a um critério específico.</div>
+            </div>
+            <div class="function-card">
+                <div class="function-title">Função Aninhada</div>
+                <div class="function-syntax">=SOMA(C2:C6)/CONT.NÚM(C2:C6)</div>
+                <div class="function-description">Calcula a média usando SOMA e CONT.NÚM.</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="content-section" id="tutorial">
+        <h2 class="section-title">Tutorial Passo a Passo</h2>
+        
+        <div class="tutorial-steps">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>Função SOMA</h3>
+                    <p>A função <span class="keyboard-shortcut">SOMA</span> é uma das funções mais utilizadas no Excel, permitindo adicionar valores de células selecionadas. Sua sintaxe básica é <span class="keyboard-shortcut">=SOMA(número1; [número2]; ...)</span>, onde os argumentos podem ser números, referências de células ou intervalos. Por exemplo, <span class="keyboard-shortcut">=SOMA(A1:A10)</span> somará todos os valores nas células de A1 até A10. Você pode combinar intervalos e células individuais, como <span class="keyboard-shortcut">=SOMA(A1:A10; C5; D10:D20)</span>. A função SOMA ignora automaticamente células vazias e células contendo texto. Para inserir rapidamente uma soma, selecione o intervalo de células e pressione <span class="keyboard-shortcut">Alt+=</span>. A função SOMA também funciona com números negativos e pode processar até 255 argumentos.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Função MÉDIA</h3>
+                    <p>A função <span class="keyboard-shortcut">MÉDIA</span> calcula a média aritmética (valor médio) de um conjunto de números. Sua sintaxe é <span class="keyboard-shortcut">=MÉDIA(número1; [número2]; ...)</span>, onde os argumentos podem ser números, referências de células ou intervalos. Por exemplo, <span class="keyboard-shortcut">=MÉDIA(B2:B10)</span> calculará a média dos valores no intervalo B2:B10. A função MÉDIA ignora células vazias, mas considera células contendo zero como valores válidos. Isso pode ser importante quando você precisa distinguir entre "zero" e "nenhum valor". Se você quiser incluir apenas valores que atendam a determinados critérios, considere usar funções avançadas como MÉDIASE ou MÉDIASES. A função MÉDIA é essencial para análises estatísticas básicas e para identificar tendências centrais em seus dados.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Funções MÍNIMO e MÁXIMO</h3>
+                    <p>As funções <span class="keyboard-shortcut">MÍNIMO</span> e <span class="keyboard-shortcut">MÁXIMO</span> são úteis para encontrar os valores extremos em um conjunto de dados. A sintaxe para ambas é <span class="keyboard-shortcut">=MÍNIMO(número1; [número2]; ...)</span> e <span class="keyboard-shortcut">=MÁXIMO(número1; [número2]; ...)</span>. Por exemplo, <span class="keyboard-shortcut">=MÍNIMO(C2:C20)</span> retorna o menor valor no intervalo C2:C20, enquanto <span class="keyboard-shortcut">=MÁXIMO(C2:C20)</span> retorna o maior valor. Assim como a SOMA e a MÉDIA, estas funções podem aceitar múltiplos intervalos e referências individuais, como <span class="keyboard-shortcut">=MÍNIMO(A1:A10; C5; E10:E20)</span>. Ambas as funções ignoram células vazias e texto não numérico. Para análises mais avançadas, você pode utilizar <span class="keyboard-shortcut">MÍNIMOSE</span> e <span class="keyboard-shortcut">MÁXIMOSE</span> para encontrar valores extremos que atendam a critérios específicos.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h3>Função CONT.SE</h3>
+                    <p>A função <span class="keyboard-shortcut">CONT.SE</span> permite contar o número de células que atendem a um critério específico. Sua sintaxe é <span class="keyboard-shortcut">=CONT.SE(intervalo; critério)</span>, onde "intervalo" é o conjunto de células a serem avaliadas e "critério" é a condição que determina quais células serão contadas. O critério pode ser um número, texto, expressão ou referência a outra célula. Por exemplo, <span class="keyboard-shortcut">=CONT.SE(B2:B20; "Norte")</span> conta quantas vezes "Norte" aparece no intervalo B2:B20. Você pode usar operadores de comparação com números, como <span class="keyboard-shortcut">=CONT.SE(C2:C20; ">100")</span> para contar valores maiores que 100. Observe que operadores de comparação com números devem estar entre aspas. Para critérios mais complexos ou múltiplos, considere usar a função <span class="keyboard-shortcut">CONT.SES</span>, que permite avaliar vários intervalos e critérios simultaneamente.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                    <h3>Autosoma e Atalhos</h3>
+                    <p>O Excel oferece ferramentas para aplicar funções básicas rapidamente. O recurso <span class="keyboard-shortcut">Autosoma</span> está disponível no botão Σ na guia Página Inicial ou pode ser acessado com o atalho <span class="keyboard-shortcut">Alt+=</span>. Por padrão, o Autosoma insere a função SOMA, mas você pode expandir para outras funções clicando na seta ao lado do botão Σ e selecionando MÉDIA, CONT.NÚM, MÁX ou MÍN. O Excel também possui recursos inteligentes para reconhecer padrões: ao selecionar um intervalo adjacente a uma coluna ou linha de valores, o Autosoma sugere automaticamente o intervalo apropriado para a função. Para criar rapidamente um painel de resumo, selecione seus dados e pressione <span class="keyboard-shortcut">Alt+F1</span> para criar um gráfico instantâneo baseado na seleção, ou use <span class="keyboard-shortcut">F11</span> para criar um gráfico em uma nova planilha.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">6</div>
+                <div class="step-content">
+                    <h3>Funções Aninhadas</h3>
+                    <p>As funções aninhadas permitem combinar múltiplas funções em uma única fórmula para realizar cálculos mais complexos. O Excel avalia funções aninhadas de dentro para fora. Por exemplo, <span class="keyboard-shortcut">=SOMA(MÁXIMO(A1:A10); MÁXIMO(B1:B10))</span> primeiro encontra o valor máximo no intervalo A1:A10, depois o valor máximo no intervalo B1:B10, e finalmente soma esses dois valores. Você pode aninhar até 64 níveis de funções no Excel. Uma aplicação comum é usar <span class="keyboard-shortcut">=SOMA(SE(C1:C10>100; C1:C10; 0))</span>, que soma apenas os valores maiores que 100 no intervalo C1:C10. Esta é uma matriz, então em versões antigas do Excel, você precisaria pressionar <span class="keyboard-shortcut">Ctrl+Shift+Enter</span> ao criar a fórmula, mas em versões recentes isso não é mais necessário. Funções aninhadas podem ser complexas, então é recomendável construí-las gradualmente, testando cada parte separadamente antes de combiná-las.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="navigation-buttons">
+            <button class="nav-button previous">← Aula Anterior</button>
+            <button class="nav-button next">Próxima Aula →</button>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">Prisma Arena - Aula 5</div>
+            <p>Explorando o universo do Excel com tecnologia estelar</p>
+            <div class="footer-nav">
+                <a href="#inicio">Início</a>
+                <a href="#recursos">Recursos</a>
+                <a href="#demo">Demonstração</a>
+                <a href="#tutorial">Tutorial</a>
+                <a href="index.html">Menu Principal</a>
+            </div>
+            <p class="copyright">© 2025 Prisma Arena. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Criar efeito de estrelas
+        document.addEventListener('DOMContentLoaded', function() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 100;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                star.style.width = `${Math.random() * 3 + 1}px`;
+                star.style.height = star.style.width;
+                starsContainer.appendChild(star);
+            }
+
+            // Variáveis para controle da demonstração
+            const table = document.getElementById('data-table');
+            let selectedCells = [];
+            let selectionMode = false;
+            
+            // Alternar exibição do campo de critério para CONT.SE
+            document.getElementById('function-select').addEventListener('change', function() {
+                const contseParams = document.getElementById('contse-params');
+                if (this.value === 'CONT.SE') {
+                    contseParams.style.display = 'flex';
+                } else {
+                    contseParams.style.display = 'none';
+                }
+            });
+            
+            // Modo de seleção de intervalo
+            document.getElementById('select-range-btn').addEventListener('click', function() {
+                clearSelection();
+                selectionMode = true;
+                this.textContent = "Selecionando...";
+                this.style.backgroundColor = "var(--accent-color)";
+                
+                alert("Clique em células para selecioná-las. Clique novamente em 'Selecionando...' quando terminar.");
+            });
+            
+            // Função para limpar seleção
+            function clearSelection() {
+                selectedCells.forEach(cell => {
+                    cell.classList.remove('selected-range');
+                });
+                selectedCells = [];
+                document.getElementById('select-range-btn').textContent = "Selecionar Intervalo";
+                document.getElementById('select-range-btn').style.backgroundColor = "";
+                selectionMode = false;
+                document.getElementById('function-result').style.display = 'none';
+            }
+            
+            document.getElementById('clear-selection-btn').addEventListener('click', clearSelection);
+            
+            // Resetar dados
+            document.getElementById('reset-data-btn').addEventListener('click', function() {
+                location.reload();
+            });
+            
+            // Populator com dados de exemplo
+            document.getElementById('populate-data-btn').addEventListener('click', function() {
+                // Implementação real popularia a tabela com novos valores
+                alert("Esta função preencheria a tabela com novos dados de exemplo.");
+            });
+            
+            // Adicionar event listeners para as células da tabela
+            for (let i = 1; i < table.rows.length; i++) {
+                for (let j = 1; j < table.rows[i].cells.length; j++) {
+                    const cell = table.rows[i].cells[j];
+                    
+                    cell.addEventListener('click', function() {
+                        if (selectionMode) {
+                            // Adicionar ou remover da seleção
+                            if (this.classList.contains('selected-range')) {
+                                this.classList.remove('selected-range');
+                                selectedCells = selectedCells.filter(c => c !== this);
+                            } else {
+                                this.classList.add('selected-range');
+                                selectedCells.push(this);
+                            }
+                        }
+                    });
+                }
+            }
+            
+            // Aplicar função
+            document.getElementById('apply-function').addEventListener('click', function() {
+                if (selectedCells.length === 0) {
+                    alert('Por favor, selecione pelo menos uma célula primeiro.');
+                    return;
+                }
+                
+                const functionType = document.getElementById('function-select').value;
+                let result;
+                
+                // Extrair valores numéricos das células selecionadas
+                const values = selectedCells.map(cell => {
+                    const text = cell.textContent.trim();
+                    if (text === '') return NaN;
+                    
+                    // Extrair valor numérico, removendo formatação
+                    const numValue = parseFloat(text.replace(/[^\d.-]/g, ''));
+                    return isNaN(numValue) ? text : numValue;
+                }).filter(val => !isNaN(val) || typeof val === 'string');
+                
+                switch (functionType) {
+                    case 'SOMA':
+                        result = values.filter(v => typeof v === 'number').reduce((sum, val) => sum + val, 0);
+                        break;
+                        
+                    case 'MÉDIA':
+                        const numValues = values.filter(v => typeof v === 'number');
+                        result = numValues.reduce((sum, val) => sum + val, 0) / numValues.length;
+                        break;
+                        
+                    case 'MÍNIMO':
+                        result = Math.min(...values.filter(v => typeof v === 'number'));
+                        break;
+                        
+                    case 'MÁXIMO':
+                        result = Math.max(...values.filter(v => typeof v === 'number'));
+                        break;
+                        
+                    case 'CONT.SE':
+                        const criteria = document.getElementById('criteria-field').value;
+                        
+                        if (!criteria) {
+                            alert('Por favor, informe um critério para a função CONT.SE.');
+                            return;
+                        }
+                        
+                        let count = 0;
+                        let operator = '';
+                        let compareValue = '';
+                        
+                        // Verificar se é um critério de comparação
+                        if (criteria.startsWith('>') || criteria.startsWith('<') || criteria.startsWith('=')) {
+                            operator = criteria.match(/^[><]=?|=/)[0];
+                            compareValue = criteria.substring(operator.length);
+                            
+                            // Converter para número se possível
+                            const numCompare = parseFloat(compareValue);
+                            if (!isNaN(numCompare)) {
+                                compareValue = numCompare;
+                            }
+                            
+                            // Contar com base no operador
+                            values.forEach(val => {
+                                if (
+                                    (operator === '>' && val > compareValue) ||
+                                    (operator === '>=' && val >= compareValue) ||
+                                    (operator === '<' && val < compareValue) ||
+                                    (operator === '<=' && val <= compareValue) ||
+                                    (operator === '=' && val == compareValue)
+                                ) {
+                                    count++;
+                                }
+                            });
+                        } else {
+                            // Contar ocorrências exatas do critério
+                            count = values.filter(val => val == criteria).length;
+                        }
+                        
+                        result = count;
+                        break;
+                }
+                
+                // Exibir resultado formatado
+                if (!isNaN(result)) {
+                    if (Number.isInteger(result)) {
+                        document.getElementById('result-value').textContent = result;
+                    } else {
+                        document.getElementById('result-value').textContent = result.toFixed(2);
+                    }
+                } else {
+                    document.getElementById('result-value').textContent = 'Erro ao calcular';
+                }
+                
+                document.getElementById('function-result').style.display = 'block';
+            });
+            
+            // Manipulador para os botões de navegação
+            document.querySelector('.previous').addEventListener('click', function() {
+                window.location.href = 'aula4_formulas.html';
+            });
+            
+            document.querySelector('.next').addEventListener('click', function() {
+                window.location.href = 'aula6_funcoes_texto_data.html';
+            });
+            
+            // Adicionar smooth scroll para navegação
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+            
+            // Animação para o botão CTA
+            document.querySelector('.cta-button').addEventListener('click', function() {
+                document.querySelector('#recursos').scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>

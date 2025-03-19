@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prisma Arena - Curso de Excel</title>
+    <style>
+        :root {
+            --primary-color: #2e0259;
+            --secondary-color: #5727a3;
+            --accent-color: #9152e0;
+            --highlight-color: #bf7af0;
+            --star-color: #f5c6ff;
+            --text-color: #ffffff;
+            --dark-bg: #0a0118;
+            --cell-border: #5727a3;
+            --grid-bg: rgba(15, 3, 40, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(145, 82, 224, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 70% 60%, rgba(191, 122, 240, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 40% 80%, rgba(245, 198, 255, 0.08) 0%, transparent 20%);
+            overflow-x: hidden;
+        }
+
+        header {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(145, 82, 224, 0.5);
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--star-color), var(--highlight-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(245, 198, 255, 0.3);
+            display: flex;
+            align-items: center;
+        }
+
+        .logo::before {
+            content: "✧";
+            margin-right: 0.5rem;
+            font-size: 1.8rem;
+            -webkit-text-fill-color: var(--star-color);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--highlight-color);
+            transition: width 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--highlight-color);
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4rem 1rem;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, var(--accent-color), var(--highlight-color), var(--star-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            max-width: 700px;
+            margin-bottom: 2.5rem;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #d8c3e9;
+        }
+
+        .cta-button {
+            background: linear-gradient(45deg, var(--accent-color), var(--highlight-color));
+            color: var(--text-color);
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(145, 82, 224, 0.5);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(145, 82, 224, 0.7);
+        }
+
+        .content-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 1rem;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 2.5rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: "";
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(to right, var(--accent-color), var(--highlight-color));
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .course-card {
+            background: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .course-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(145, 82, 224, 0.1), rgba(191, 122, 240, 0.1));
+            z-index: -1;
+            transform: translateY(100%);
+            transition: transform 0.5s;
+        }
+
+        .course-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(145, 82, 224, 0.3);
+        }
+
+        .course-card:hover::before {
+            transform: translateY(0);
+        }
+
+        .course-number {
+            font-size: 1.2rem;
+            margin-bottom: 0.5rem;
+            color: var(--star-color);
+        }
+
+        .course-card h3 {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            color: var(--highlight-color);
+        }
+
+        .course-card p {
+            color: #d8c3e9;
+            line-height: 1.5;
+            margin-bottom: 1.5rem;
+            flex-grow: 1;
+        }
+
+        .card-button {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            border: none;
+            padding: 0.6rem 1.2rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            font-weight: 500;
+            align-self: flex-start;
+        }
+
+        .card-button:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .about-section {
+            background: var(--grid-bg);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 4rem auto;
+            max-width: 1000px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--secondary-color);
+        }
+
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .about-image {
+            background: linear-gradient(135deg, var(--secondary-color), var(--primary-color));
+            border-radius: 10px;
+            height: 300px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: var(--star-color);
+            overflow: hidden;
+        }
+
+        .about-content h3 {
+            margin-bottom: 1.5rem;
+            color: var(--highlight-color);
+            font-size: 1.8rem;
+        }
+
+        .about-content p {
+            color: #d8c3e9;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .features-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2.5rem;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .feature-icon {
+            background-color: var(--secondary-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            color: var(--text-color);
+            flex-shrink: 0;
+        }
+
+        .feature-text h4 {
+            margin-bottom: 0.5rem;
+            color: var(--highlight-color);
+        }
+
+        .feature-text p {
+            color: #d8c3e9;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        footer {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 3rem 1rem;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--star-color), var(--highlight-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+
+        .footer-nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .footer-nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-nav a:hover {
+            color: var(--highlight-color);
+        }
+
+        .copyright {
+            margin-top: 2rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        /* Efeito de partículas estelares */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background-color: var(--star-color);
+            border-radius: 50%;
+            animation: twinkle 5s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 0.2;
+                transform: scale(0.8);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        .progress-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: var(--grid-bg);
+            border-radius: 15px;
+            border: 1px solid var(--secondary-color);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background-color: rgba(46, 2, 89, 0.5);
+            border-radius: 5px;
+            margin: 2rem 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-color), var(--highlight-color));
+            border-radius: 5px;
+            width: 0%;
+            transition: width 1s ease;
+        }
+
+        .milestone-markers {
+            position: relative;
+            width: 100%;
+            height: 30px;
+            margin-top: -20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .milestone {
+            position: relative;
+            width: 20px;
+            height: 20px;
+            background-color: var(--primary-color);
+            border: 2px solid var(--secondary-color);
+            border-radius: 50%;
+            z-index: 2;
+            transition: background-color 0.3s;
+        }
+
+        .milestone.active {
+            background-color: var(--highlight-color);
+            box-shadow: 0 0 10px var(--highlight-color);
+        }
+
+        .milestone-label {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.8rem;
+            color: var(--star-color);
+            white-space: nowrap;
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul {
+                gap: 1rem;
+                margin-top: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .about-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .milestone-label {
+                font-size: 0.7rem;
+                transform: translateX(-50%) rotate(-45deg);
+                top: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Efeito de estrelas -->
+    <div class="stars" id="stars"></div>
+
+    <header>
+        <div class="nav-container">
+            <div class="logo">Prisma Arena Excel</div>
+            <nav>
+                <ul>
+                    <li><a href="#inicio">Início</a></li>
+                    <li><a href="#aulas">Aulas</a></li>
+                    <li><a href="#sobre">Sobre o Curso</a></li>
+                    <li><a href="#progresso">Seu Progresso</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero" id="inicio">
+        <h1>Domine o Excel na Era Estelar</h1>
+        <p>Bem-vindo ao curso Prisma Arena Excel, onde você aprenderá desde os fundamentos básicos até as técnicas avançadas para se tornar um mestre na análise de dados. Prepare-se para uma jornada única através do universo do Excel, onde cada aula é uma nova descoberta.</p>
+        <button class="cta-button">Ver Módulos do Curso</button>
+    </section>
+
+    <section class="content-section" id="aulas">
+        <h2 class="section-title">Módulo 1: Fundamentos do Excel</h2>
+        
+        <div class="grid-container">
+            <div class="course-card">
+                <div class="course-number">Aula 1</div>
+                <h3>Introdução ao Excel</h3>
+                <p>Navegação básica, interface, criação e salvamento de planilhas. Aprenda sobre fontes, cores, alinhamento, formatação de coluna, mesclagem e quebra de texto.</p>
+                <a href="aula1_introducao.html" class="card-button">Acessar Aula</a>
+            </div>
+            
+            <div class="course-card">
+                <div class="course-number">Aula 2</div>
+                <h3>Operações Básicas de Células</h3>
+                <p>Domine as técnicas de inserção, edição e exclusão de dados, além de aprender a copiar, colar e mover células com eficiência para organizar seus dados.</p>
+                <a href="aula2_operacoes_basicas.html" class="card-button">Acessar Aula</a>
+            </div>
+            
+            <div class="course-card">
+                <div class="course-number">Aula 3</div>
+                <h3>Formatação de Células</h3>
+                <p>Explore a formatação de texto, números, datas e alinhamento. Aprenda a utilizar estilos e temas para criar planilhas visualmente atraentes e profissionais.</p>
+                <a href="aula3_formatacao.html" class="card-button">Acessar Aula</a>
+            </div>
+            
+            <div class="course-card">
+                <div class="course-number">Aula 4</div>
+                <h3>Fórmulas</h3>
+                <p>Introdução ao mundo das fórmulas no Excel. Aprenda a realizar operações aritméticas simples e a construir fórmulas que facilitam cálculos automatizados.</p>
+                <a href="aula4_formulas.html" class="card-button">Acessar Aula</a>
+            </div>
+            
+            <div class="course-card">
+                <div class="course-number">Aula 5</div>
+                <h3>Funções Básicas</h3>
+                <p>Conheça e aplique as funções essenciais como SOMA, MÉDIA, MÍNIMO, MÁXIMO e CONT.SE para realizar análises rápidas e eficientes de seus dados.</p>
+                <a href="aula5_funcoes_basicas.html" class="card-button">Acessar Aula</a>
+            </div>
+            
+            <div class="course-card">
+                <div class="course-number">Aula 6</div>
+                <h3>Funções de Texto e Data</h3>
+                <p>Domine funções essenciais como CONCATENAR, TEXTO, HOJE e DIAS para transformar e manipular textos e datas em suas planilhas com precisão.</p>
+                <a href="aula6_funcoes_texto_data.html" class="card-button">Acessar Aula</a>
+            </div>
+            
+            <div class="course-card">
+                <div class="course-number">Aula 7</div>
+                <h3>Travamento de Fórmula</h3>
+                <p>Aprenda a função INDICE e técnicas de travamento de fórmula para manter referências fixas e criar cálculos dinâmicos em suas planilhas.</p>
+                <a href="aula7_travamento_formula.html" class="card-button">Acessar Aula</a>
+            </div>
+            
+            <div class="course-card">
+                <div class="course-number">Aula 8</div>
+                <h3>Manipulação de Dados</h3>
+                <p>Desenvolva habilidades de ordenação e filtragem de dados, e aprenda a utilizar filtros automáticos para localizar informações específicas rapidamente.</p>
+                <a href="aula8_manipulacao_dados.html" class="card-button">Acessar Aula</a>
+            </div>
+            
+            <div class="course-card">
+                <div class="course-number">Aula 9</div>
+                <h3>Gráficos e Visualização</h3>
+                <p>Explore a criação e personalização de gráficos. Conheça os diversos tipos de gráficos e suas aplicações para representar dados de forma visual e impactante.</p>
+                <a href="aula9_graficos.html" class="card-button">Acessar Aula</a>
+            </div>
+            
+            <div class="course-card">
+                <div class="course-number">Aula 10</div>
+                <h3>Tabelas Dinâmicas</h3>
+                <p>Domine a criação e configuração de tabelas dinâmicas. Aprenda técnicas de agrupamento e resumo de dados para análises avançadas e relatórios precisos.</p>
+                <a href="aula10_tabelas_dinamicas.html" class="card-button">Acessar Aula</a>
+            </div>
+            
+            <div class="course-card">
+                <div class="course-number">Aula 11</div>
+                <h3>Revisão</h3>
+                <p>Consolide seus conhecimentos com uma revisão abrangente sobre travamento de células, gráficos, funções e manipulação de dados em uma aula integradora.</p>
+                <a href="aula11_revisao.html" class="card-button">Acessar Aula</a>
+            </div>
+            
+            <div class="course-card">
+                <div class="course-number">Aula 12</div>
+                <h3>Avaliação Final</h3>
+                <p>Teste seus conhecimentos e habilidades adquiridos durante o módulo com uma avaliação prática que abrange todos os conceitos estudados.</p>
+                <a href="aula12_avaliacao.html" class="card-button">Acessar Aula</a>
+            </div>
+        </div>
+
+    </section>
+
+    <section class="about-section" id="sobre">
+        <h2 class="section-title">Sobre o Curso</h2>
+        
+        <div class="about-grid">
+            <div class="about-image">
+                <span>📊</span>
+            </div>
+            <div class="about-content">
+                <h3>Uma Jornada Pelo Universo do Excel</h3>
+                <p>O curso Prisma Arena Excel foi desenvolvido para transformar iniciantes em especialistas, através de uma metodologia interativa e prática que facilita o aprendizado e a retenção de conhecimento.</p>
+                <p>Cada aula combina teoria concisa com exercícios práticos e desafios, permitindo que você aplique imediatamente o que aprendeu em cenários reais de análise de dados.</p>
+                
+                <div class="features-list">
+                    <div class="feature-item">
+                        <div class="feature-icon">✓</div>
+                        <div class="feature-text">
+                            <h4>Conteúdo Interativo</h4>
+                            <p>Aprenda através de demonstrações práticas e exercícios interativos que simulam situações reais.</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">✓</div>
+                        <div class="feature-text">
+                            <h4>Progressão Lógica</h4>
+                            <p>O conteúdo é estruturado para construir conhecimento passo a passo, do básico ao avançado.</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">✓</div>
+                        <div class="feature-text">
+                            <h4>Recursos Adicionais</h4>
+                            <p>Acesso a planilhas de exemplo, exercícios complementares e material de apoio para aprofundamento.</p>
+                        </div>
+                    </div>
+                    <div class="feature-item">
+                        <div class="feature-icon">✓</div>
+                        <div class="feature-text">
+                            <h4>Certificação</h4>
+                            <p>Ao concluir o módulo com aprovação na avaliação final, receba seu certificado de conclusão.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="content-section" id="progresso">
+        <h2 class="section-title">Seu Progresso</h2>
+        
+        <div class="progress-container">
+            <h3>Módulo 1: Fundamentos do Excel</h3>
+            <p>Acompanhe seu avanço no curso e visualize as próximas etapas da sua jornada de aprendizado.</p>
+            
+            <div class="progress-bar">
+                <div class="progress" id="progress-indicator"></div>
+            </div>
+            
+            <div class="milestone-markers">
+                <div class="milestone active" title="Aula 1">
+                    <div class="milestone-label">Aula 1</div>
+                </div>
+                <div class="milestone active" title="Aula 2">
+                    <div class="milestone-label">Aula 2</div>
+                </div>
+                <div class="milestone active" title="Aula 3">
+                    <div class="milestone-label">Aula 3</div>
+                </div>
+                <div class="milestone active" title="Aula 4">
+                    <div class="milestone-label">Aula 4</div>
+                </div>
+                <div class="milestone active" title="Aula 5">
+                    <div class="milestone-label">Aula 5</div>
+                </div>
+                <div class="milestone" title="Aula 6">
+                    <div class="milestone-label">Aula 6</div>
+                </div>
+                <div class="milestone" title="Aula 7">
+                    <div class="milestone-label">Aula 7</div>
+                </div>
+                <div class="milestone" title="Aula 8">
+                    <div class="milestone-label">Aula 8</div>
+                </div>
+                <div class="milestone" title="Aula 9">
+                    <div class="milestone-label">Aula 9</div>
+                </div>
+                <div class="milestone" title="Aula 10">
+                    <div class="milestone-label">Aula 10</div>
+                </div>
+                <div class="milestone" title="Aula 11">
+                    <div class="milestone-label">Aula 11</div>
+                </div>
+                <div class="milestone" title="Aula 12">
+                    <div class="milestone-label">Aula 12</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">Prisma Arena Excel</div>
+            <p>Explorando o universo dos dados com tecnologia estelar</p>
+            <div class="footer-nav">
+                <a href="#inicio">Início</a>
+                <a href="#aulas">Aulas</a>
+                <a href="#sobre">Sobre o Curso</a>
+                <a href="#progresso">Seu Progresso</a>
+            </div>
+            <p class="copyright">© 2025 Prisma Arena. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Criar efeito de estrelas
+        document.addEventListener('DOMContentLoaded', function() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 100;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                star.style.width = `${Math.random() * 3 + 1}px`;
+                star.style.height = star.style.width;
+                starsContainer.appendChild(star);
+            }
+
+            // Botão CTA para rolar até a seção de aulas
+            document.querySelector('.cta-button').addEventListener('click', function() {
+                document.querySelector('#aulas').scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+            
+            // Animação da barra de progresso
+            setTimeout(() => {
+                document.getElementById('progress-indicator').style.width = '41.6%'; // 5/12 * 100%
+            }, 500);
+            
+            // Adicionar smooth scroll para navegação
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+            
+            // Configuração dos botões de acesso às aulas
+            const acessarButtons = document.querySelectorAll('.card-button');
+            
+            acessarButtons.forEach((button, index) => {
+                button.addEventListener('click', function() {
+                    // Arrays com os nomes das páginas das aulas
+                    const aulaPages = [
+                        'aula1_introducao.html',
+                        'aula2_operacoes_basicas.html',
+                        'aula3_formatacao.html',
+                        'aula4_formulas.html',
+                        'aula5_funcoes_basicas.html',
+                        'aula6_funcoes_texto_data.html',
+                        'aula7_travamento_formula.html',
+                        'aula8_manipulacao_dados.html',
+                        'aula9_graficos.html',
+                        'aula10_tabelas_dinamicas.html',
+                        'aula11_revisao.html',
+                        'aula12_avaliacao.html'
+                    ];
+                    
+                    // Redirecionar para a página da aula correspondente
+                    // Na implementação real, você substituiria o alert pelo redirecionamento
+                    alert(`Redirecionando para: ${aulaPages[index]}`);
+                    // window.location.href = aulaPages[index]; // Comentado para demonstração
+                });
+            });
+        });
+    </script>
+</body>
+</html>

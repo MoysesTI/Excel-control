@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prisma Arena - Aula 2: Operações Básicas de Células</title>
+    <style>
+        :root {
+            --primary-color: #2e0259;
+            --secondary-color: #5727a3;
+            --accent-color: #9152e0;
+            --highlight-color: #bf7af0;
+            --star-color: #f5c6ff;
+            --text-color: #ffffff;
+            --dark-bg: #0a0118;
+            --cell-border: #5727a3;
+            --grid-bg: rgba(15, 3, 40, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(145, 82, 224, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 70% 60%, rgba(191, 122, 240, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 40% 80%, rgba(245, 198, 255, 0.08) 0%, transparent 20%);
+            overflow-x: hidden;
+        }
+
+        header {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(145, 82, 224, 0.5);
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--star-color), var(--highlight-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(245, 198, 255, 0.3);
+            display: flex;
+            align-items: center;
+        }
+
+        .logo::before {
+            content: "✧";
+            margin-right: 0.5rem;
+            font-size: 1.8rem;
+            -webkit-text-fill-color: var(--star-color);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--highlight-color);
+            transition: width 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--highlight-color);
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4rem 1rem;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, var(--accent-color), var(--highlight-color), var(--star-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            max-width: 700px;
+            margin-bottom: 2.5rem;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #d8c3e9;
+        }
+
+        .cta-button {
+            background: linear-gradient(45deg, var(--accent-color), var(--highlight-color));
+            color: var(--text-color);
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(145, 82, 224, 0.5);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(145, 82, 224, 0.7);
+        }
+
+        .content-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 1rem;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 2.5rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: "";
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(to right, var(--accent-color), var(--highlight-color));
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .feature-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(145, 82, 224, 0.1), rgba(191, 122, 240, 0.1));
+            z-index: -1;
+            transform: translateY(100%);
+            transition: transform 0.5s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(145, 82, 224, 0.3);
+        }
+
+        .feature-card:hover::before {
+            transform: translateY(0);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--highlight-color);
+        }
+
+        .feature-card h3 {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            color: var(--highlight-color);
+        }
+
+        .feature-card p {
+            color: #d8c3e9;
+            line-height: 1.5;
+        }
+
+        .demo-section {
+            background: var(--grid-bg);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 4rem auto;
+            max-width: 1000px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--secondary-color);
+        }
+
+        .spreadsheet-demo {
+            overflow-x: auto;
+            margin-top: 2rem;
+            background-color: rgba(10, 1, 24, 0.7);
+            border-radius: 8px;
+            border: 1px solid var(--secondary-color);
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 800px;
+        }
+
+        th, td {
+            border: 1px solid var(--cell-border);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: rgba(87, 39, 163, 0.1);
+        }
+
+        tr:hover {
+            background-color: rgba(145, 82, 224, 0.2);
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .control-button {
+            background: var(--primary-color);
+            color: var(--text-color);
+            border: 1px solid var(--accent-color);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .selected-cell {
+            background-color: rgba(191, 122, 240, 0.3) !important;
+        }
+
+        .edit-mode {
+            box-shadow: 0 0 0 2px var(--highlight-color);
+            outline: none;
+        }
+
+        .tutorial-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .step-card {
+            background: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 10px;
+            padding: 2rem;
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .step-content h3 {
+            margin-bottom: 1rem;
+            color: var(--highlight-color);
+        }
+
+        .step-content p {
+            color: #d8c3e9;
+            line-height: 1.6;
+        }
+
+        .keyboard-shortcut {
+            display: inline-block;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            margin: 0 0.2rem;
+        }
+
+        .clipboard {
+            background-color: rgba(46, 2, 89, 0.5);
+            border: 1px dashed var(--accent-color);
+            padding: 0.5rem;
+            margin: 1rem 0;
+            border-radius: 5px;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .clipboard-icon {
+            font-size: 1.5rem;
+            color: var(--highlight-color);
+        }
+        
+        .clipboard-content {
+            color: #d8c3e9;
+            font-style: italic;
+        }
+
+        footer {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 3rem 1rem;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--star-color), var(--highlight-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+
+        .footer-nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .footer-nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-nav a:hover {
+            color: var(--highlight-color);
+        }
+
+        .copyright {
+            margin-top: 2rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        /* Efeito de partículas estelares */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background-color: var(--star-color);
+            border-radius: 50%;
+            animation: twinkle 5s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 0.2;
+                transform: scale(0.8);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+        }
+
+        .nav-button {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-button:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul {
+                gap: 1rem;
+                margin-top: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .step-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .controls {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Efeito de estrelas -->
+    <div class="stars" id="stars"></div>
+
+    <header>
+        <div class="nav-container">
+            <div class="logo">Prisma Arena - Aula 2</div>
+            <nav>
+                <ul>
+                    <li><a href="#inicio">Início</a></li>
+                    <li><a href="#recursos">Recursos</a></li>
+                    <li><a href="#demo">Demonstração</a></li>
+                    <li><a href="#tutorial">Tutorial</a></li>
+                    <li><a href="index.html">Voltar ao Menu</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero" id="inicio">
+        <h1>Operações Básicas de Células na Era Estelar</h1>
+        <p>Nesta aula, você dominará as operações fundamentais com células no Excel. Aprenda a inserir, editar e excluir dados com eficiência, bem como técnicas para copiar, colar e mover células para organizar suas informações de forma rápida e precisa.</p>
+        <button class="cta-button">Começar a Explorar</button>
+    </section>
+
+    <section class="content-section" id="recursos">
+        <h2 class="section-title">Recursos Estelares</h2>
+        <div class="grid-container">
+            <div class="feature-card">
+                <div class="feature-icon">✏️</div>
+                <h3>Inserção de Dados</h3>
+                <p>Domine os diferentes tipos de dados que o Excel reconhece automaticamente e aprenda os métodos mais eficientes para inserir valores, textos e datas em suas células.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔄</div>
+                <h3>Edição de Células</h3>
+                <p>Explore técnicas para modificar o conteúdo de células existentes, usando a barra de fórmulas ou editando diretamente nas células para atualizações rápidas.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">❌</div>
+                <h3>Exclusão de Dados</h3>
+                <p>Aprenda diferentes métodos para limpar o conteúdo de células, remover formatação ou eliminar células inteiras, mantendo a integridade de suas planilhas.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📋</div>
+                <h3>Copiar e Colar</h3>
+                <p>Descubra as poderosas funcionalidades de copiar e colar do Excel, incluindo opções especiais como colar valores, formatos ou fórmulas para maior controle.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔀</div>
+                <h3>Mover Células</h3>
+                <p>Reorganize seus dados com técnicas eficientes para mover conteúdo entre células, linhas ou colunas, garantindo uma estrutura lógica para suas informações.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⌨️</div>
+                <h3>Atalhos de Teclado</h3>
+                <p>Aumente sua produtividade com atalhos de teclado essenciais para operações com células, economizando tempo e reduzindo o esforço nas tarefas rotineiras.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="demo-section" id="demo">
+        <h2 class="section-title">Demonstração Interativa</h2>
+        <p>Experimente as operações básicas com células nesta demonstração interativa. Selecione uma célula e use os controles abaixo para aplicar diferentes operações.</p>
+        
+        <div class="controls">
+            <button class="control-button" id="inserir-btn">Inserir Dados</button>
+            <button class="control-button" id="editar-btn">Editar Célula</button>
+            <button class="control-button" id="limpar-btn">Limpar Conteúdo</button>
+            <button class="control-button" id="copiar-btn">Copiar</button>
+            <button class="control-button" id="colar-btn">Colar</button>
+            <button class="control-button" id="mover-btn">Mover</button>
+            <button class="control-button" id="resetar-btn">Resetar</button>
+        </div>
+        
+        <div id="clipboard-container" style="display: none;" class="clipboard">
+            <div class="clipboard-icon">📋</div>
+            <div class="clipboard-content" id="clipboard-text">Nenhum conteúdo copiado</div>
+        </div>
+        
+        <div class="spreadsheet-demo">
+            <table id="data-table">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>A</th>
+                        <th>B</th>
+                        <th>C</th>
+                        <th>D</th>
+                        <th>E</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>Produto</td>
+                        <td>Quantidade</td>
+                        <td>Preço Unit.</td>
+                        <td>Subtotal</td>
+                        <td>Status</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>Monitor Estelar</td>
+                        <td>3</td>
+                        <td>R$ 1.200,00</td>
+                        <td>R$ 3.600,00</td>
+                        <td>Em Estoque</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>Teclado Quântico</td>
+                        <td>5</td>
+                        <td>R$ 350,00</td>
+                        <td>R$ 1.750,00</td>
+                        <td>Em Estoque</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>Mouse Prisma</td>
+                        <td>10</td>
+                        <td>R$ 120,00</td>
+                        <td>R$ 1.200,00</td>
+                        <td>Baixo Estoque</td>
+                    </tr>
+                    <tr>
+                        <td>5</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>6</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>7</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                    <tr>
+                        <td>8</td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="content-section" id="tutorial">
+        <h2 class="section-title">Tutorial Passo a Passo</h2>
+        
+        <div class="tutorial-steps">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>Inserção de Dados</h3>
+                    <p>Para inserir dados em uma célula, primeiro selecione-a clicando nela e, em seguida, digite o conteúdo desejado. Pressione <span class="keyboard-shortcut">Enter</span> para confirmar e mover para a célula abaixo, ou <span class="keyboard-shortcut">Tab</span> para confirmar e mover para a célula à direita. O Excel reconhece automaticamente diferentes tipos de dados: texto, números, datas e fórmulas (que começam com =). Para forçar o Excel a tratar um número como texto, digite uma apóstrofe (') antes do número. Para inserir dados em várias células adjacentes de uma vez, selecione o intervalo de células e digite o valor - pressione <span class="keyboard-shortcut">Ctrl+Enter</span> para preencher todas as células selecionadas com o mesmo valor.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Edição de Células</h3>
+                    <p>Para editar o conteúdo de uma célula, você pode: dar um duplo clique na célula para editar diretamente nela; selecionar a célula e pressionar <span class="keyboard-shortcut">F2</span>; ou selecionar a célula e editar seu conteúdo na barra de fórmulas (acima da planilha). Durante a edição, use as teclas de seta para mover o cursor pelo texto. Pressione <span class="keyboard-shortcut">Esc</span> para cancelar a edição ou <span class="keyboard-shortcut">Enter</span> para confirmar as alterações. Para substituir completamente o conteúdo, simplesmente selecione a célula e comece a digitar - o conteúdo anterior será substituído. Para editar apenas parte do conteúdo, utilize um dos métodos de edição mencionados anteriormente.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Exclusão de Dados</h3>
+                    <p>Existem diferentes formas de remover dados de células: para limpar apenas o conteúdo, selecione a célula e pressione <span class="keyboard-shortcut">Delete</span>; para remover conteúdo e formatação, selecione a célula, clique com o botão direito e escolha "Limpar conteúdo" ou use o menu Página Inicial > Limpar > Limpar Tudo. Para excluir células inteiras (o que causa o deslocamento de outras células), selecione as células, clique com o botão direito e escolha "Excluir..." ou use o menu Página Inicial > Células > Excluir. Você terá então a opção de deslocar células para a esquerda ou para cima. Para excluir linhas ou colunas inteiras, selecione os cabeçalhos de linha/coluna, clique com o botão direito e escolha "Excluir".</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h3>Copiar e Colar</h3>
+                    <p>O Excel oferece diversas opções para copiar e colar dados. Para copiar, selecione a célula ou intervalo, pressione <span class="keyboard-shortcut">Ctrl+C</span> ou clique em Página Inicial > Copiar. Para colar, selecione a célula de destino e pressione <span class="keyboard-shortcut">Ctrl+V</span> ou clique em Página Inicial > Colar. O Excel também oferece opções avançadas de colagem: Colar Valores (apenas os valores, sem fórmulas ou formatação), Colar Formatos (apenas a formatação), Colar Fórmulas (apenas as fórmulas), entre outras. Acesse estas opções clicando na seta abaixo do botão Colar ou pressionando <span class="keyboard-shortcut">Ctrl+Alt+V</span> para abrir a caixa de diálogo "Colar Especial". Uma funcionalidade útil é o Pincel de Formatação: selecione uma célula com a formatação desejada, clique no ícone do Pincel na guia Página Inicial e depois clique na célula onde deseja aplicar a mesma formatação.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                    <h3>Mover Células</h3>
+                    <p>Para mover células e seu conteúdo, você pode usar o método arrastar e soltar ou recortar e colar. Para arrastar e soltar: selecione as células, posicione o cursor na borda da seleção até que ele se transforme em uma seta de quatro pontas, clique e arraste até o novo local, e solte o botão do mouse. Para usar recortar e colar: selecione as células, pressione <span class="keyboard-shortcut">Ctrl+X</span> (ou Página Inicial > Recortar), selecione a célula de destino e pressione <span class="keyboard-shortcut">Ctrl+V</span> (ou Página Inicial > Colar). Ao mover células que contêm fórmulas, o Excel ajusta automaticamente as referências relativas. Se quiser inserir células movidas sem substituir o conteúdo existente, use Inserir Células Recortadas no menu de contexto ao colar, ou na caixa de diálogo Colar Especial.</p>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">6</div>
+                <div class="step-content">
+                    <h3>Atalhos de Teclado Essenciais</h3>
+                    <p>Domine estes atalhos para aumentar sua produtividade: <span class="keyboard-shortcut">Ctrl+C</span> (Copiar), <span class="keyboard-shortcut">Ctrl+X</span> (Recortar), <span class="keyboard-shortcut">Ctrl+V</span> (Colar), <span class="keyboard-shortcut">Ctrl+Z</span> (Desfazer), <span class="keyboard-shortcut">Ctrl+Y</span> (Refazer), <span class="keyboard-shortcut">F2</span> (Editar célula), <span class="keyboard-shortcut">Delete</span> (Limpar conteúdo), <span class="keyboard-shortcut">Shift+Delete</span> (Excluir células), <span class="keyboard-shortcut">Ctrl+Home</span> (Ir para o início da planilha), <span class="keyboard-shortcut">Ctrl+End</span> (Ir para a última célula com dados), <span class="keyboard-shortcut">Ctrl+Seta</span> (Mover até o próximo bloco de dados), <span class="keyboard-shortcut">Ctrl+Espaço</span> (Selecionar coluna inteira), <span class="keyboard-shortcut">Shift+Espaço</span> (Selecionar linha inteira), <span class="keyboard-shortcut">Ctrl+A</span> (Selecionar todas as células). Estes atalhos economizam tempo e tornam seu trabalho com o Excel mais eficiente.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="navigation-buttons">
+            <button class="nav-button previous">← Aula Anterior</button>
+            <button class="nav-button next">Próxima Aula →</button>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">Prisma Arena - Aula 2</div>
+            <p>Explorando o universo do Excel com tecnologia estelar</p>
+            <div class="footer-nav">
+                <a href="#inicio">Início</a>
+                <a href="#recursos">Recursos</a>
+                <a href="#demo">Demonstração</a>
+                <a href="#tutorial">Tutorial</a>
+                <a href="index.html">Menu Principal</a>
+            </div>
+            <p class="copyright">© 2025 Prisma Arena. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Criar efeito de estrelas
+        document.addEventListener('DOMContentLoaded', function() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 100;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                star.style.width = `${Math.random() * 3 + 1}px`;
+                star.style.height = star.style.width;
+                starsContainer.appendChild(star);
+            }
+
+            // Variáveis para controle da demonstração
+            const table = document.getElementById('data-table');
+            let selectedCell = null;
+            let clipboardContent = null;
+            const clipboardContainer = document.getElementById('clipboard-container');
+            const clipboardText = document.getElementById('clipboard-text');
+            
+            // Adicionar event listeners para as células da tabela
+            for (let i = 1; i < table.rows.length; i++) {
+                for (let j = 1; j < table.rows[i].cells.length; j++) {
+                    const cell = table.rows[i].cells[j];
+                    
+                    cell.addEventListener('click', function() {
+                        // Remover a classe da célula anteriormente selecionada
+                        if (selectedCell) {
+                            selectedCell.classList.remove('selected-cell');
+                            selectedCell.contentEditable = false;
+                            selectedCell.classList.remove('edit-mode');
+                        }
+                        
+                        // Adicionar a classe à nova célula selecionada
+                        this.classList.add('selected-cell');
+                        selectedCell = this;
+                    });
+                }
+            }
+            
+            // Botão Inserir Dados
+            document.getElementById('inserir-btn').addEventListener('click', function() {
+                if (selectedCell) {
+                    const novoValor = prompt('Digite o conteúdo para inserir na célula:', '');
+                    if (novoValor !== null) {
+                        selectedCell.textContent = novoValor;
+                        alert('Dado inserido com sucesso!');
+                    }
+                } else {
+                    alert('Por favor, selecione uma célula primeiro.');
+                }
+            });
+            
+            // Botão Editar Célula
+            document.getElementById('editar-btn').addEventListener('click', function() {
+                if (selectedCell) {
+                    selectedCell.contentEditable = true;
+                    selectedCell.classList.add('edit-mode');
+                    selectedCell.focus();
+                    
+                    // Listener para confirmar edição ao pressionar Enter
+                    selectedCell.addEventListener('keydown', function(e) {
+                        if (e.key === 'Enter') {
+                            e.preventDefault();
+                            this.contentEditable = false;
+                            this.classList.remove('edit-mode');
+                            alert('Célula editada com sucesso!');
+                        }
+                    }, { once: true });
+                } else {
+                    alert('Por favor, selecione uma célula primeiro.');
+                }
+            });
+            
+            // Botão Limpar Conteúdo
+            document.getElementById('limpar-btn').addEventListener('click', function() {
+                if (selectedCell) {
+                    selectedCell.textContent = '';
+                    alert('Conteúdo da célula removido!');
+                } else {
+                    alert('Por favor, selecione uma célula primeiro.');
+                }
+            });
+            
+            // Botão Copiar
+            document.getElementById('copiar-btn').addEventListener('click', function() {
+                if (selectedCell) {
+                    clipboardContent = selectedCell.textContent;
+                    clipboardText.textContent = clipboardContent || '(célula vazia)';
+                    clipboardContainer.style.display = 'flex';
+                    alert('Conteúdo copiado para a área de transferência!');
+                } else {
+                    alert('Por favor, selecione uma célula primeiro.');
+                }
+            });
+            
+            // Botão Colar
+            document.getElementById('colar-btn').addEventListener('click', function() {
+                if (selectedCell && clipboardContent !== null) {
+                    selectedCell.textContent = clipboardContent;
+                    alert('Conteúdo colado com sucesso!');
+                } else if (!selectedCell) {
+                    alert('Por favor, selecione uma célula primeiro.');
+                } else {
+                    alert('Não há conteúdo na área de transferência para colar.');
+                }
+            });
+            
+            // Botão Mover
+            document.getElementById('mover-btn').addEventListener('click', function() {
+                if (selectedCell) {
+                    const conteudo = selectedCell.textContent;
+                    selectedCell.textContent = '';
+                    
+                    alert('Conteúdo recortado. Agora selecione a célula de destino e clique em "Colar".');
+                    
+                    clipboardContent = conteudo;
+                    clipboardText.textContent = clipboardContent || '(célula vazia)';
+                    clipboardContainer.style.display = 'flex';
+                } else {
+                    alert('Por favor, selecione uma célula primeiro.');
+                }
+            });
+            
+            // Botão Resetar
+            document.getElementById('resetar-btn').addEventListener('click', function() {
+                location.reload();
+            });
+            
+            // Manipulador para os botões de navegação
+            document.querySelector('.previous').addEventListener('click', function() {
+                window.location.href = 'aula1_introducao.html';
+            });
+            
+            document.querySelector('.next').addEventListener('click', function() {
+                window.location.href = 'aula3_formatacao.html';
+            });
+            
+            // Adicionar smooth scroll para navegação
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+            
+            // Animação para o botão CTA
+            document.querySelector('.cta-button').addEventListener('click', function() {
+                document.querySelector('#recursos').scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
