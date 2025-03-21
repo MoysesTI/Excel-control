@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prisma Arena - Aula 6: Funções de Texto e Data</title>
+    <style>
+        :root {
+            --primary-color: #2e0259;
+            --secondary-color: #5727a3;
+            --accent-color: #9152e0;
+            --highlight-color: #bf7af0;
+            --star-color: #f5c6ff;
+            --text-color: #ffffff;
+            --dark-bg: #0a0118;
+            --cell-border: #5727a3;
+            --grid-bg: rgba(15, 3, 40, 0.8);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(145, 82, 224, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 70% 60%, rgba(191, 122, 240, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 40% 80%, rgba(245, 198, 255, 0.08) 0%, transparent 20%);
+            overflow-x: hidden;
+        }
+
+        header {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(145, 82, 224, 0.5);
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--star-color), var(--highlight-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(245, 198, 255, 0.3);
+            display: flex;
+            align-items: center;
+        }
+
+        .logo::before {
+            content: "✧";
+            margin-right: 0.5rem;
+            font-size: 1.8rem;
+            -webkit-text-fill-color: var(--star-color);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--highlight-color);
+            transition: width 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--highlight-color);
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4rem 1rem;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, var(--accent-color), var(--highlight-color), var(--star-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            max-width: 700px;
+            margin-bottom: 2.5rem;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #d8c3e9;
+        }
+
+        .cta-button {
+            background: linear-gradient(45deg, var(--accent-color), var(--highlight-color));
+            color: var(--text-color);
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(145, 82, 224, 0.5);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(145, 82, 224, 0.7);
+        }
+
+        .content-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 1rem;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 2.5rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: "";
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(to right, var(--accent-color), var(--highlight-color));
+        }
+
+        .grid-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .feature-card {
+            background: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .feature-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(145, 82, 224, 0.1), rgba(191, 122, 240, 0.1));
+            z-index: -1;
+            transform: translateY(100%);
+            transition: transform 0.5s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(145, 82, 224, 0.3);
+        }
+
+        .feature-card:hover::before {
+            transform: translateY(0);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--highlight-color);
+        }
+
+        .feature-card h3 {
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+            color: var(--highlight-color);
+        }
+
+        .feature-card p {
+            color: #d8c3e9;
+            line-height: 1.5;
+        }
+
+        .demo-section {
+            background: var(--grid-bg);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 4rem auto;
+            max-width: 1000px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--secondary-color);
+        }
+
+        .interface-demo {
+            margin-top: 2rem;
+            background-color: rgba(10, 1, 24, 0.7);
+            border-radius: 8px;
+            border: 1px solid var(--secondary-color);
+            overflow: hidden;
+        }
+
+        .excel-toolbar {
+            background: linear-gradient(to bottom, #3a3a3a, #2a2a2a);
+            padding: 10px;
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+        }
+
+        .toolbar-section {
+            display: flex;
+            gap: 5px;
+            padding: 0 5px;
+            border-right: 1px solid #444;
+        }
+
+        .toolbar-button {
+            background-color: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 3px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .toolbar-button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .excel-header {
+            background-color: #121212;
+            padding: 8px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .sheet-tabs {
+            background-color: #1a1a1a;
+            padding: 5px 15px;
+            display: flex;
+            gap: 10px;
+        }
+
+        .sheet-tab {
+            padding: 5px 15px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 3px 3px 0 0;
+            cursor: pointer;
+        }
+
+        .sheet-tab.active {
+            background-color: rgba(145, 82, 224, 0.3);
+        }
+
+        .spreadsheet-grid {
+            overflow-x: auto;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            min-width: 800px;
+        }
+
+        th, td {
+            border: 1px solid var(--cell-border);
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        th {
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            font-weight: 600;
+        }
+
+        tr:nth-child(even) {
+            background-color: rgba(87, 39, 163, 0.1);
+        }
+
+        tr:hover {
+            background-color: rgba(145, 82, 224, 0.2);
+        }
+
+        .controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .control-button {
+            background: var(--primary-color);
+            color: var(--text-color);
+            border: 1px solid var(--accent-color);
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .control-button:hover {
+            background-color: var(--secondary-color);
+            transform: translateY(-2px);
+        }
+
+        .selected-cell {
+            background-color: rgba(191, 122, 240, 0.3) !important;
+        }
+
+        .tutorial-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+
+        .step-card {
+            background: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 10px;
+            padding: 2rem;
+            display: flex;
+            gap: 1.5rem;
+            align-items: flex-start;
+        }
+
+        .step-number {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .step-content h3 {
+            margin-bottom: 1rem;
+            color: var(--highlight-color);
+        }
+
+        .step-content p {
+            color: #d8c3e9;
+            line-height: 1.6;
+        }
+
+        .keyboard-shortcut {
+            display: inline-block;
+            background-color: var(--secondary-color);
+            color: var(--text-color);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            margin: 0 0.2rem;
+        }
+
+        .function-syntax {
+            background-color: rgba(46, 2, 89, 0.5);
+            border-left: 3px solid var(--highlight-color);
+            padding: 0.75rem;
+            margin: 1rem 0;
+            border-radius: 0 8px 8px 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+        }
+
+        .function-example {
+            margin-top: 0.75rem;
+            color: var(--star-color);
+        }
+
+        footer {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 3rem 1rem;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--star-color), var(--highlight-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+
+        .footer-nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 2rem;
+            margin: 1.5rem 0;
+        }
+
+        .footer-nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .footer-nav a:hover {
+            color: var(--highlight-color);
+        }
+
+        .copyright {
+            margin-top: 2rem;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background-color: var(--star-color);
+            border-radius: 50%;
+            animation: twinkle 5s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 0.2;
+                transform: scale(0.8);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        .navigation-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 3rem;
+        }
+
+        .nav-button {
+            background: var(--secondary-color);
+            color: var(--text-color);
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.3s;
+            font-weight: 500;
+        }
+
+        .nav-button:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul {
+                gap: 1rem;
+                margin-top: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .step-card {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .controls {
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Efeito de estrelas -->
+    <div class="stars" id="stars"></div>
+
+    <header>
+        <div class="nav-container">
+            <div class="logo">Prisma Arena - Aula 6</div>
+            <nav>
+                <ul>
+                    <li><a href="#inicio">Início</a></li>
+                    <li><a href="#recursos">Recursos</a></li>
+                    <li><a href="#demo">Demonstração</a></li>
+                    <li><a href="#tutorial">Tutorial</a></li>
+                    <li><a href="index.html">Voltar ao Menu</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero" id="inicio">
+        <h1>Funções de Texto e Data no Excel</h1>
+        <p>Bem-vindo à sexta aula na Prisma Arena Excel. Nesta jornada, você dominará as funções essenciais para manipular textos e datas em suas planilhas. Aprenda a concatenar informações, formatar textos e realizar cálculos precisos com datas para elevar suas habilidades analíticas a um novo patamar estelar.</p>
+        <button class="cta-button">Iniciar Aprendizado</button>
+    </section>
+
+    <section class="content-section" id="recursos">
+        <h2 class="section-title">Recursos Estelares</h2>
+        <div class="grid-container">
+            <div class="feature-card">
+                <div class="feature-icon">✨</div>
+                <h3>Funções de Texto</h3>
+                <p>Domine funções como CONCATENAR, TEXTO, MAIÚSCULA e MINÚSCULA para manipular e transformar dados textuais em suas planilhas de forma eficiente.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔍</div>
+                <h3>Localização e Extração</h3>
+                <p>Aprenda a localizar e extrair informações específicas de células usando PROCURAR, LOCALIZAR, ESQUERDA, DIREITA e EXT.TEXTO.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📅</div>
+                <h3>Funções de Data</h3>
+                <p>Utilize HOJE, AGORA, DATA e DATADIF para inserir, calcular e manipular datas com precisão em suas análises.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⏱️</div>
+                <h3>Cálculos com Datas</h3>
+                <p>Descubra como calcular dias úteis, diferenças entre datas e extrair componentes específicos como dia, mês e ano.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">🔄</div>
+                <h3>Conversão de Formatos</h3>
+                <p>Transforme formatos de texto para data e vice-versa, garantindo consistência e precisão em seus dados.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Aplicações Práticas</h3>
+                <p>Explore casos reais de aplicação das funções em relatórios, análises de prazos, controle de projetos e muito mais.</p>
+            </div>
+        </div>
+    </section>
+
+    <section class="demo-section" id="demo">
+        <h2 class="section-title">Exemplos Práticos</h2>
+        <p>Explore os exemplos abaixo e veja como as funções de texto e data podem transformar sua forma de trabalhar com dados no Excel. Use os controles para visualizar diferentes aplicações.</p>
+        
+        <div class="controls">
+            <button class="control-button" id="texto-btn">Funções de Texto</button>
+            <button class="control-button" id="data-btn">Funções de Data</button>
+            <button class="control-button" id="combinada-btn">Funções Combinadas</button>
+            <button class="control-button" id="resetar-btn">Resetar</button>
+        </div>
+        
+        <div class="interface-demo">
+            <div class="excel-header">
+                <span>Funções_Texto_Data.xlsx - Excel</span>
+                <span>Prisma Arena</span>
+            </div>
+            <div class="excel-toolbar">
+                <div class="toolbar-section">
+                    <button class="toolbar-button">B</button>
+                    <button class="toolbar-button">I</button>
+                    <button class="toolbar-button">U</button>
+                </div>
+                <div class="toolbar-section">
+                    <button class="toolbar-button">fx</button>
+                    <button class="toolbar-button">∑</button>
+                    <button class="toolbar-button">📅</button>
+                </div>
+                <div class="toolbar-section">
+                    <button class="toolbar-button">abc</button>
+                    <button class="toolbar-button">#</button>
+                    <button class="toolbar-button">⧉</button>
+                </div>
+            </div>
+            <div class="spreadsheet-grid">
+                <table id="data-table">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>A</th>
+                            <th>B</th>
+                            <th>C</th>
+                            <th>D</th>
+                            <th>E</th>
+                            <th>F</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td><strong>Dados Originais</strong></td>
+                            <td><strong>Fórmula</strong></td>
+                            <td><strong>Resultado</strong></td>
+                            <td></td>
+                            <td><strong>Função</strong></td>
+                            <td><strong>Descrição</strong></td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Estrela</td>
+                            <td>=CONCATENAR(A2;" Prisma")</td>
+                            <td>Estrela Prisma</td>
+                            <td></td>
+                            <td>CONCATENAR</td>
+                            <td>Une textos de células</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>prisma arena</td>
+                            <td>=MAIÚSCULA(A3)</td>
+                            <td>PRISMA ARENA</td>
+                            <td></td>
+                            <td>MAIÚSCULA</td>
+                            <td>Converte para maiúsculas</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>15/03/2025</td>
+                            <td>=TEXTO(A4;"DD/MM/AAAA")</td>
+                            <td>15/03/2025</td>
+                            <td></td>
+                            <td>TEXTO</td>
+                            <td>Formata número ou data</td>
+                        </tr>
+                        <tr>
+                            <td>5</td>
+                            <td>15/03/2025</td>
+                            <td>=HOJE()</td>
+                            <td>21/03/2025</td>
+                            <td></td>
+                            <td>HOJE</td>
+                            <td>Retorna a data atual</td>
+                        </tr>
+                        <tr>
+                            <td>6</td>
+                            <td>15/03/2025</td>
+                            <td>=DIAS(B5;A6)</td>
+                            <td>6</td>
+                            <td></td>
+                            <td>DIAS</td>
+                            <td>Calcula dias entre datas</td>
+                        </tr>
+                        <tr>
+                            <td>7</td>
+                            <td>Cód: AX-2025</td>
+                            <td>=EXT.TEXTO(A7;6;4)</td>
+                            <td>AX-2</td>
+                            <td></td>
+                            <td>EXT.TEXTO</td>
+                            <td>Extrai parte do texto</td>
+                        </tr>
+                        <tr>
+                            <td>8</td>
+                            <td>01/01/2025</td>
+                            <td>=DATADIF(A8;B5;"M")</td>
+                            <td>2</td>
+                            <td></td>
+                            <td>DATADIF</td>
+                            <td>Diferença entre datas</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="sheet-tabs">
+                <div class="sheet-tab active">Funções</div>
+                <div class="sheet-tab">Exemplos</div>
+                <div class="sheet-tab">Exercícios</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="content-section" id="tutorial">
+        <h2 class="section-title">Tutorial Passo a Passo</h2>
+        
+        <div class="tutorial-steps">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h3>Funções Básicas de Texto</h3>
+                    <p>As funções de texto permitem manipular e transformar dados textuais em suas planilhas. A função <span class="keyboard-shortcut">CONCATENAR</span> une textos de diferentes células, enquanto <span class="keyboard-shortcut">MAIÚSCULA</span>, <span class="keyboard-shortcut">MINÚSCULA</span> e <span class="keyboard-shortcut">PRI.MAIÚSCULA</span> alteram a capitalização. A função <span class="keyboard-shortcut">TEXTO</span> é poderosa para formatar números como textos com padrões específicos.</p>
+                    
+                    <div class="function-syntax">
+                        =CONCATENAR(texto1; [texto2]; ...)
+                        <div class="function-example">Exemplo: =CONCATENAR("Prisma";" ";"Arena") → "Prisma Arena"</div>
+                    </div>
+                    
+                    <div class="function-syntax">
+                        =TEXTO(valor; formato)
+                        <div class="function-example">Exemplo: =TEXTO(1250,75;"R$ #.##0,00") → "R$ 1.250,75"</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h3>Localização e Extração de Texto</h3>
+                    <p>Para extrair informações específicas de textos, utilize as funções <span class="keyboard-shortcut">LOCALIZAR</span> e <span class="keyboard-shortcut">PROCURAR</span> para encontrar a posição de um texto dentro de outro. As funções <span class="keyboard-shortcut">ESQUERDA</span>, <span class="keyboard-shortcut">DIREITA</span> e <span class="keyboard-shortcut">EXT.TEXTO</span> permitem extrair caracteres de uma posição específica. Essas funções são especialmente úteis para trabalhar com códigos, documentos ou qualquer dado estruturado.</p>
+                    
+                    <div class="function-syntax">
+                        =LOCALIZAR(texto_procurado; no_texto; [início])
+                        <div class="function-example">Exemplo: =LOCALIZAR("Excel";"Curso de Excel") → 10</div>
+                    </div>
+                    
+                    <div class="function-syntax">
+                        =EXT.TEXTO(texto; núm_inicial; [núm_caract])
+                        <div class="function-example">Exemplo: =EXT.TEXTO("Prisma Arena";1;6) → "Prisma"</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h3>Funções Básicas de Data</h3>
+                    <p>O Excel oferece funções poderosas para lidar com datas, facilitando cálculos e análises temporais. A função <span class="keyboard-shortcut">HOJE()</span> retorna a data atual, enquanto <span class="keyboard-shortcut">AGORA()</span> inclui também a hora. Para construir datas específicas, utilize a função <span class="keyboard-shortcut">DATA(ano;mês;dia)</span> que cria um valor de data válido a partir dos parâmetros fornecidos.</p>
+                    
+                    <div class="function-syntax">
+                        =HOJE()
+                        <div class="function-example">Exemplo: =HOJE() → retorna a data atual do sistema (21/03/2025)</div>
+                    </div>
+                    
+                    <div class="function-syntax">
+                        =DATA(ano;mês;dia)
+                        <div class="function-example">Exemplo: =DATA(2025;3;21) → 21/03/2025</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">4</div>
+                <div class="step-content">
+                    <h3>Cálculos com Datas</h3>
+                    <p>Calcular períodos entre datas é uma tarefa comum em análises de prazo e projetos. A função <span class="keyboard-shortcut">DIAS</span> calcula o número de dias entre duas datas, enquanto <span class="keyboard-shortcut">DATADIF</span> oferece mais flexibilidade ao permitir calcular diferenças em dias, meses ou anos. Para determinar o dia da semana, utilize a função <span class="keyboard-shortcut">DIA.DA.SEMANA</span>, que retorna um número de 1 (domingo) a 7 (sábado).</p>
+                    
+                    <div class="function-syntax">
+                        =DIAS(data_final;data_inicial)
+                        <div class="function-example">Exemplo: =DIAS("21/03/2025";"01/01/2025") → 79</div>
+                    </div>
+                    
+                    <div class="function-syntax">
+                        =DATADIF(data_inicial;data_final;"unidade")
+                        <div class="function-example">Exemplo: =DATADIF("01/01/2025";"21/03/2025";"M") → 2 (diferença em meses)</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">5</div>
+                <div class="step-content">
+                    <h3>Extração de Componentes de Data</h3>
+                    <p>Quando precisamos trabalhar com partes específicas de uma data, as funções <span class="keyboard-shortcut">DIA</span>, <span class="keyboard-shortcut">MÊS</span> e <span class="keyboard-shortcut">ANO</span> são extremamente úteis. Essas funções extraem o componente desejado de um valor de data, permitindo análises mais granulares. Para situações mais avançadas, a função <span class="keyboard-shortcut">DIATRABALHOTOTAL</span> calcula o número de dias úteis entre duas datas, excluindo fins de semana e, opcionalmente, feriados.</p>
+                    
+                    <div class="function-syntax">
+                        =DIA(data)
+                        <div class="function-example">Exemplo: =DIA("21/03/2025") → 21</div>
+                    </div>
+                    
+                    <div class="function-syntax">
+                        =MÊS(data)
+                        <div class="function-example">Exemplo: =MÊS("21/03/2025") → 3</div>
+                    </div>
+                    
+                    <div class="function-syntax">
+                        =ANO(data)
+                        <div class="function-example">Exemplo: =ANO("21/03/2025") → 2025</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="step-card">
+                <div class="step-number">6</div>
+                <div class="step-content">
+                    <h3>Combinando Funções de Texto e Data</h3>
+                    <p>O poder real dessas funções emerge quando as combinamos para resolver problemas complexos. Podemos usar <span class="keyboard-shortcut">TEXTO</span> para formatar datas de maneira personalizada, <span class="keyboard-shortcut">CONCATENAR</span> para criar relatórios formatados com datas, ou combinar <span class="keyboard-shortcut">EXT.TEXTO</span> com <span class="keyboard-shortcut">LOCALIZAR</span> para extrair informações de datas em formato de texto. Essas combinações permitem automatizar tarefas avançadas de manipulação de dados.</p>
+                    
+                    <div class="function-syntax">
+                        =CONCATENAR("Data de vencimento: ";TEXTO(A1;"DD/MM/AAAA"))
+                        <div class="function-example">Exemplo: Se A1 contém 21/03/2025 → "Data de vencimento: 21/03/2025"</div>
+                    </div>
+                    
+                    <div class="function-syntax">
+                        =SE(DIAS(HOJE();A1)>30;"Vencido";"Em dia")
+                        <div class="function-example">Exemplo: Verifica se uma data em A1 está vencida há mais de 30 dias</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="navigation-buttons">
+            <button class="nav-button previous">← Aula Anterior</button>
+            <button class="nav-button next">Próxima Aula →</button>
+        </div>
+    </section>
+
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">Prisma Arena - Aula 6</div>
+            <p>Dominando Texto e Data no universo Excel com tecnologia estelar</p>
+            <div class="footer-nav">
+                <a href="#inicio">Início</a>
+                <a href="#recursos">Recursos</a>
+                <a href="#demo">Demonstração</a>
+                <a href="#tutorial">Tutorial</a>
+                <a href="index.html">Menu Principal</a>
+            </div>
+            <p class="copyright">© 2025 Prisma Arena. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Criar efeito de estrelas
+        document.addEventListener('DOMContentLoaded', function() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 100;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                star.style.width = `${Math.random() * 3 + 1}px`;
+                star.style.height = star.style.width;
+                starsContainer.appendChild(star);
+            }
+
+            // Funcionalidade de seleção de células
+            const table = document.getElementById('data-table');
+            let selectedCell = null;
+            
+            // Adicionando event listeners para as células da tabela
+            for (let i = 1; i < table.rows.length; i++) {
+                for (let j = 1; j < table.rows[i].cells.length; j++) {
+                    const cell = table.rows[i].cells[j];
+                    
+                    cell.addEventListener('click', function() {
+                        // Remover a classe da célula anteriormente selecionada
+                        if (selectedCell) {
+                            selectedCell.classList.remove('selected-cell');
+                        }
+                        
+                        // Adicionar a classe à nova célula selecionada
+                        this.classList.add('selected-cell');
+                        selectedCell = this;
+                    });
+                }
+            }
+            
+            // Manipuladores de eventos para os botões de demonstração
+            document.getElementById('texto-btn').addEventListener('click', function() {
+                // Destacar funções de texto
+                highlightRows([2, 3, 4, 7]);
+                alert('Funções de Texto: Observe como o CONCATENAR une textos, MAIÚSCULA transforma a capitalização, TEXTO formata valores e EXT.TEXTO extrai partes específicas do texto. Estas funções são essenciais para manipular e formatar dados textuais.');
+            });
+            
+            document.getElementById('data-btn').addEventListener('click', function() {
+                // Destacar funções de data
+                highlightRows([5, 6, 8]);
+                alert('Funções de Data: A função HOJE retorna a data atual do sistema, DIAS calcula a diferença entre duas datas e DATADIF permite calcular a diferença em várias unidades (dias, meses, anos). Estas funções são fundamentais para análises temporais.');
+            });
+            
+            document.getElementById('combinada-btn').addEventListener('click', function() {
+                // Mostrar exemplo de função combinada
+                alert('Funções Combinadas: Ao combinar funções como TEXTO(HOJE();\"DD/MM/AAAA\") ou CONCATENAR(\"Vencimento em: \";DIAS(data_venc;HOJE());" dias\"), você pode criar soluções poderosas para seus relatórios e análises. A combinação de funções amplia exponencialmente as possibilidades.');
+            });
+            
+            document.getElementById('resetar-btn').addEventListener('click', function() {
+                // Remover todos os destaques
+                clearHighlights();
+            });
+            
+            // Função para destacar linhas específicas
+            function highlightRows(rowIndices) {
+                clearHighlights();
+                
+                rowIndices.forEach(index => {
+                    // Índice +1 porque a primeira linha é o cabeçalho
+                    if (index < table.rows.length) {
+                        const row = table.rows[index];
+                        for (let i = 1; i < row.cells.length; i++) {
+                            row.cells[i].style.backgroundColor = 'rgba(191, 122, 240, 0.3)';
+                        }
+                    }
+                });
+            }
+            
+            // Função para limpar todos os destaques
+            function clearHighlights() {
+                for (let i = 1; i < table.rows.length; i++) {
+                    for (let j = 1; j < table.rows[i].cells.length; j++) {
+                        table.rows[i].cells[j].style.backgroundColor = '';
+                    }
+                }
+            }
+            
+            // Manipuladores para os botões de navegação
+            document.querySelector('.previous').addEventListener('click', function() {
+                window.location.href = 'aula5_funcoes_basicas.html';
+            });
+            
+            document.querySelector('.next').addEventListener('click', function() {
+                window.location.href = 'aula7_referencias.html';
+            });
+            
+            // Adicionar smooth scroll para navegação
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+            
+            // Animação para o botão CTA
+            document.querySelector('.cta-button').addEventListener('click', function() {
+                document.querySelector('#recursos').scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
