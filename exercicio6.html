@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prisma Arena - Funções de Texto e Data</title>
+    <style>
+        :root {
+            --primary-color: #2e0259;
+            --secondary-color: #5727a3;
+            --accent-color: #9152e0;
+            --highlight-color: #bf7af0;
+            --star-color: #f5c6ff;
+            --text-color: #ffffff;
+            --dark-bg: #0a0118;
+            --cell-border: #5727a3;
+            --grid-bg: rgba(15, 3, 40, 0.8);
+            --correct-color: #4caf50;
+            --incorrect-color: #f44336;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--text-color);
+            min-height: 100vh;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(145, 82, 224, 0.15) 0%, transparent 20%),
+                radial-gradient(circle at 70% 60%, rgba(191, 122, 240, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 40% 80%, rgba(245, 198, 255, 0.08) 0%, transparent 20%);
+            overflow-x: hidden;
+        }
+
+        header {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(145, 82, 224, 0.5);
+            position: relative;
+            z-index: 10;
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--star-color), var(--highlight-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 15px rgba(245, 198, 255, 0.3);
+            display: flex;
+            align-items: center;
+        }
+
+        .logo::before {
+            content: "✧";
+            margin-right: 0.5rem;
+            font-size: 1.8rem;
+            -webkit-text-fill-color: var(--star-color);
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+
+        nav a {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            position: relative;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background-color: var(--highlight-color);
+            transition: width 0.3s;
+        }
+
+        nav a:hover {
+            color: var(--highlight-color);
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 4rem 1rem;
+            position: relative;
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            background: linear-gradient(to right, var(--accent-color), var(--highlight-color), var(--star-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            max-width: 700px;
+            margin-bottom: 2.5rem;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            color: #d8c3e9;
+        }
+
+        .cta-button {
+            background: linear-gradient(45deg, var(--accent-color), var(--highlight-color));
+            color: var(--text-color);
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            font-weight: 600;
+            box-shadow: 0 4px 15px rgba(145, 82, 224, 0.5);
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(145, 82, 224, 0.7);
+        }
+
+        .content-section {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 4rem 1rem;
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            font-size: 2.5rem;
+            position: relative;
+        }
+
+        .section-title::after {
+            content: "";
+            position: absolute;
+            bottom: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(to right, var(--accent-color), var(--highlight-color));
+        }
+
+        .function-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin: 3rem 0;
+        }
+
+        .function-card {
+            background: rgba(46, 2, 89, 0.3);
+            border: 1px solid var(--secondary-color);
+            border-radius: 10px;
+            padding: 1.5rem;
+            transition: transform 0.3s, box-shadow 0.3s;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+
+        .function-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, rgba(145, 82, 224, 0.1), rgba(191, 122, 240, 0.1));
+            z-index: -1;
+            transform: translateY(100%);
+            transition: transform 0.5s;
+        }
+
+        .function-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(145, 82, 224, 0.3);
+        }
+
+        .function-card:hover::before {
+            transform: translateY(0);
+        }
+
+        .function-name {
+            font-size: 1.5rem;
+            color: var(--highlight-color);
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+
+        .function-syntax {
+            background-color: rgba(10, 1, 24, 0.7);
+            border: 1px solid var(--accent-color);
+            border-radius: 4px;
+            padding: 0.6rem;
+            margin-bottom: 1rem;
+            font-family: monospace;
+            color: var(--star-color);
+        }
+
+        .function-description {
+            color: #d8c3e9;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+
+        .function-example {
+            background-color: rgba(10, 1, 24, 0.7);
+            border-left: 3px solid var(--accent-color);
+            padding: 0.6rem;
+            font-family: monospace;
+            color: #d8c3e9;
+        }
+
+        .function-result {
+            color: var(--highlight-color);
+            font-weight: bold;
+        }
+
+        .exercise-section {
+            background: var(--grid-bg);
+            border-radius: 15px;
+            padding: 2rem;
+            margin: 4rem auto;
+            max-width: 900px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--secondary-color);
+        }
+
+        .exercise-title {
+            color: var(--highlight-color);
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .exercise-description {
+            color: #d8c3e9;
+            line-height: 1.6;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .exercise-container {
+            background-color: rgba(46, 2, 89, 0.5);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .exercise-prompt {
+            color: var(--star-color);
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+
+        .exercise-input {
+            background-color: rgba(10, 1, 24, 0.7);
+            color: var(--text-color);
+            border: 1px solid var(--secondary-color);
+            border-radius: 4px;
+            padding: 0.8rem;
+            width: 100%;
+            font-family: monospace;
+            margin-bottom: 1rem;
+        }
+
+        .exercise-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 10px rgba(145, 82, 224, 0.5);
+        }
+
+        .exercise-btn {
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s, transform 0.2s;
+            margin-right: 1rem;
+        }
+
+        .exercise-btn:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .exercise-feedback {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 4px;
+            font-weight: bold;
+            display: none;
+        }
+
+        .feedback-correct {
+            background-color: rgba(76, 175, 80, 0.2);
+            border: 1px solid var(--correct-color);
+            color: var(--correct-color);
+        }
+
+        .feedback-incorrect {
+            background-color: rgba(244, 67, 54, 0.2);
+            border: 1px solid var(--incorrect-color);
+            color: var(--incorrect-color);
+        }
+
+        .hint-btn {
+            background: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            padding: 0.8rem 1.5rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s, color 0.2s;
+        }
+
+        .hint-btn:hover {
+            background-color: rgba(145, 82, 224, 0.2);
+        }
+
+        .hint-text {
+            margin-top: 1rem;
+            padding: 1rem;
+            background-color: rgba(10, 1, 24, 0.7);
+            border-left: 3px solid var(--accent-color);
+            display: none;
+            color: #d8c3e9;
+        }
+
+        .interactive-demo {
+            background-color: rgba(46, 2, 89, 0.5);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 3rem 0;
+        }
+
+        .demo-title {
+            color: var(--highlight-color);
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+            font-weight: bold;
+        }
+
+        .demo-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .demo-input {
+            background-color: rgba(10, 1, 24, 0.7);
+            color: var(--text-color);
+            border: 1px solid var(--secondary-color);
+            border-radius: 4px;
+            padding: 0.8rem;
+            flex: 1;
+            min-width: 250px;
+            font-family: monospace;
+        }
+
+        .demo-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 10px rgba(145, 82, 224, 0.5);
+        }
+
+        .demo-select {
+            background-color: rgba(10, 1, 24, 0.7);
+            color: var(--text-color);
+            border: 1px solid var(--secondary-color);
+            border-radius: 4px;
+            padding: 0.8rem;
+            min-width: 150px;
+        }
+
+        .demo-result {
+            background-color: rgba(10, 1, 24, 0.7);
+            border: 1px solid var(--accent-color);
+            border-radius: 4px;
+            padding: 1rem;
+            margin-top: 1rem;
+            min-height: 60px;
+            font-family: monospace;
+            color: var(--highlight-color);
+        }
+
+        .formula-builder {
+            background-color: rgba(10, 1, 24, 0.7);
+            border: 1px solid var(--secondary-color);
+            border-radius: 4px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-family: monospace;
+            color: var(--star-color);
+        }
+
+        .footer {
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            padding: 3rem 1rem;
+            text-align: center;
+            margin-top: 4rem;
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .footer-logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+            background: linear-gradient(to right, var(--star-color), var(--highlight-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+        }
+
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background-color: var(--star-color);
+            border-radius: 50%;
+            animation: twinkle 5s infinite;
+        }
+
+        @keyframes twinkle {
+            0%, 100% {
+                opacity: 0.2;
+                transform: scale(0.8);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .nav-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            nav ul {
+                gap: 1rem;
+                margin-top: 1rem;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Efeito de estrelas -->
+    <div class="stars" id="stars"></div>
+
+    <header>
+        <div class="nav-container">
+            <div class="logo">Prisma Arena</div>
+            <nav>
+                <ul>
+                    <li><a href="#inicio">Início</a></li>
+                    <li><a href="#textos">Funções de Texto</a></li>
+                    <li><a href="#datas">Funções de Data</a></li>
+                    <li><a href="#exercicios">Exercícios</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero" id="inicio">
+        <h1>Funções de Texto e Data</h1>
+        <p>Domine o poder das funções de manipulação de texto e cálculos de data no Excel. Essas ferramentas poderosas são essenciais para análise de dados e automação de tarefas no dia a dia.</p>
+        <button class="cta-button">Explorar Funções</button>
+    </section>
+
+    <section class="content-section" id="textos">
+        <h2 class="section-title">Funções de Texto</h2>
+        <p>As funções de texto do Excel permitem manipular strings, extrair informações e formatar dados textuais para apresentação. Essenciais para limpar dados, gerar relatórios e personalizar a saída de informações.</p>
+
+        <div class="function-grid">
+            <div class="function-card">
+                <div class="function-name">CONCATENAR</div>
+                <div class="function-syntax">=CONCATENAR(texto1; [texto2]; ...)</div>
+                <div class="function-description">Une dois ou mais textos em um único texto. Ideal para combinar informações de diferentes células.</div>
+                <div class="function-example">
+                    =CONCATENAR("Prisma";" ";"Arena")<br>
+                    <span class="function-result">→ "Prisma Arena"</span>
+                </div>
+            </div>
+
+            <div class="function-card">
+                <div class="function-name">MAIÚSCULA</div>
+                <div class="function-syntax">=MAIÚSCULA(texto)</div>
+                <div class="function-description">Converte todas as letras de um texto para maiúsculas, facilitando a padronização de dados.</div>
+                <div class="function-example">
+                    =MAIÚSCULA("excel avançado")<br>
+                    <span class="function-result">→ "EXCEL AVANÇADO"</span>
+                </div>
+            </div>
+
+            <div class="function-card">
+                <div class="function-name">MINÚSCULA</div>
+                <div class="function-syntax">=MINÚSCULA(texto)</div>
+                <div class="function-description">Converte todas as letras de um texto para minúsculas, útil para comparação de textos.</div>
+                <div class="function-example">
+                    =MINÚSCULA("PRISMA Arena")<br>
+                    <span class="function-result">→ "prisma arena"</span>
+                </div>
+            </div>
+
+            <div class="function-card">
+                <div class="function-name">PRI.MAIÚSCULA</div>
+                <div class="function-syntax">=PRI.MAIÚSCULA(texto)</div>
+                <div class="function-description">Converte a primeira letra de cada palavra para maiúscula e as demais para minúsculas.</div>
+                <div class="function-example">
+                    =PRI.MAIÚSCULA("prisma ARENA")<br>
+                    <span class="function-result">→ "Prisma Arena"</span>
+                </div>
+            </div>
+
+            <div class="function-card">
+                <div class="function-name">TEXTO</div>
+                <div class="function-syntax">=TEXTO(valor; formato)</div>
+                <div class="function-description">Converte um número para texto com um formato específico. Perfeito para formatar valores monetários, datas e percentuais.</div>
+                <div class="function-example">
+                    =TEXTO(1250,75;"R$ #.##0,00")<br>
+                    <span class="function-result">→ "R$ 1.250,75"</span>
+                </div>
+            </div>
+
+            <div class="function-card">
+                <div class="function-name">LOCALIZAR</div>
+                <div class="function-syntax">=LOCALIZAR(texto_procurado; no_texto; [início])</div>
+                <div class="function-description">Encontra a posição de um texto dentro de outro, considerando maiúsculas e minúsculas.</div>
+                <div class="function-example">
+                    =LOCALIZAR("Excel";"Curso de Excel")<br>
+                    <span class="function-result">→ 10</span>
+                </div>
+            </div>
+
+            <div class="function-card">
+                <div class="function-name">PROCURAR</div>
+                <div class="function-syntax">=PROCURAR(texto_procurado; no_texto; [início])</div>
+                <div class="function-description">Similar ao LOCALIZAR, mas não diferencia maiúsculas de minúsculas na busca.</div>
+                <div class="function-example">
+                    =PROCURAR("excel";"Curso de Excel")<br>
+                    <span class="function-result">→ 10</span>
+                </div>
+            </div>
+
+            <div class="function-card">
+                <div class="function-name">EXT.TEXTO</div>
+                <div class="function-syntax">=EXT.TEXTO(texto; núm_inicial; [núm_caract])</div>
+                <div class="function-description">Extrai caracteres de um texto a partir de uma posição específica.</div>
+                <div class="function-example">
+                    =EXT.TEXTO("Prisma Arena";1;6)<br>
+                    <span class="function-result">→ "Prisma"</span>
+                </div>
+            </div>
+
+            <div class="function-card">
+                <div class="function-name">ESQUERDA</div>
+                <div class="function-syntax">=ESQUERDA(texto; [núm_caract])</div>
+                <div class="function-description">Extrai caracteres do início de um texto.</div>
+                <div class="function-example">
+                    =ESQUERDA("Prisma Arena";6)<br>
+                    <span class="function-result">→ "Prisma"</span>
+                </div>
+            </div>
+
+            <div class="function-card">
+                <div class="function-name">DIREITA</div>
+                <div class="function-syntax">=DIREITA(texto; [núm_caract])</div>
+                <div class="function-description">Extrai caracteres do final de um texto.</div>
+                <div class="function-example">
+                    =DIREITA("Prisma Arena";5)<br>
+                    <span class="function-result">→ "Arena"</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="interactive-demo">
+            <div class="demo-title">Demonstração Interativa: Funções de Texto</div>
+            <div class="demo-controls">
+                <input type="text" id="text-input" class="demo-input" placeholder="Digite um texto para manipular..." value="Prisma Arena">
+                <select id="text-function" class="demo-select">
+                    <option value="MAIUSCULA">MAIÚSCULA</option>
+                    <option value="MINUSCULA">MINÚSCULA</option>
+                    <option value="PRI.MAIUSCULA">PRI.MAIÚSCULA</option>
+                    <option value="ESQUERDA">ESQUERDA</option>
+                    <option value="DIREITA">DIREITA</option>
+                    <option value="EXT.TEXTO">EXT.TEXTO</option>
+                </select>
+                <input type="number" id="param1" class="demo-input" placeholder="Parâmetro 1" style="max-width: 150px;" value="5">
+                <input type="number" id="param2" class="demo-input" placeholder="Parâmetro 2" style="max-width: 150px; display: none;">
+            </div>
+            <div class="formula-builder" id="formula-preview">=MAIÚSCULA("Prisma Arena")</div>
+            <div class="demo-result" id="text-result">PRISMA ARENA</div>
+        </div>
+    </section>
+
+    <section class="content-section" id="datas">
+        <h2 class="section-title">Funções de Data</h2>
+        <p>As funções de data permitem manipular, calcular e formatar informações temporais. Essenciais para análises de prazos, projetos e para automatizar relatórios com componentes temporais.</p>
+
+        <div class="function-grid">
+            <div class="function-card">
+                <div class="function-name">HOJE</div>
+                <div class="function-syntax">=HOJE()</div>
+                <div class="function-description">Retorna a data atual do sistema. Útil para cálculos automáticos baseados na data corrente.</div>
+                <div class="function-example">
+                    =HOJE()<br>
+                    <span class="function-result">→ 22/03/2025 (depende da data atual)</span>
+                </div>
+            </div>
+
+            <div class="function-card">
+                <div class="function-name">AGORA</div>
+                <div class="function-syntax">=AGORA()</div>
+                <div class="function-description">Retorna a data e hora atuais do sistema, permitindo maior precisão em registros temporais.</div>
+                <div class="function-example">
+                    =AGORA()<br>
+                    <span class="function-result">→ 22/03/2025 14:30 (exemplo)</span>
+                </div>
+            </div>
+
+            <div class="function-card">
+                <div class="function-name">DATA</div>
+                <div class="function-syntax">=DATA(ano;mês;dia)</div>
+                <div class="function-description">Cria uma data a partir de valores de ano, mês e dia, facilitando a criação de datas específicas.</div>
+                <div class="function-example">
+                    =DATA(2025;3;21)<br>
+                    <span class="function-result">→ 21/03/2025</span>
+                </div>
+            </div>
+
+            <div class="function-card">
+                <div class="function-name">DIA</div>
+                <div class="function-syntax">=DIA(data)</div>
+                <div class="function-description">Extrai o dia do mês de uma data, retornando um valor entre 1 e 31.</div>
+                <div class="function-example">
+                    =DIA("21/03/2025")<br>
+                    <span class="function-result">→ 21</span>
+                </div>
+            </div>
+
+            <div class="function-card">
+                <div class="function-name">MÊS</div>
+                <div class="function-syntax">=MÊS(data)</div>
+                <div class="function-description">Extrai o mês de uma data, retornando um valor entre 1 (janeiro) e 12 (dezembro).</div>
+                <div class="function-example">
+                    =MÊS("21/03/2025")<br>
+                    <span class="function-result">→ 3</span>
+                </div>
+            </div>
+
+            <div class="function-card">
+                <div class="function-name">ANO</div>
+                <div class="function-syntax">=ANO(data)</div>
+                <div class="function-description">Extrai o ano de uma data, permitindo análises por período anual.</div>
+                <div class="function-example">
+                    =ANO("21/03/2025")<br>
+                    <span class="function-result">→ 2025</span>
+                </div>
+            </div>
+
+            <div class="function-card">
+                <div class="function-name">DIAS</div>
+                <div class="function-syntax">=DIAS(data_final;data_inicial)</div>
+                <div class="function-description">Calcula o número de dias entre duas datas. Prático para calcular prazos e períodos.</div>
+                <div class="function-example">
+                    =DIAS("21/03/2025";"01/01/2025")<br>
+                    <span class="function-result">→ 79</span>
+                </div>
+            </div>
+
+            <div class="function-card">
+                <div class="function-name">DATADIF</div>
+                <div class="function-syntax">=DATADIF(data_inicial;data_final;"unidade")</div>
+                <div class="function-description">Calcula a diferença entre duas datas em unidades específicas (dias, meses ou anos).</div>
+                <div class="function-example">
+                    =DATADIF("01/01/2025";"21/03/2025";"M")<br>
+                    <span class="function-result">→ 2</span>
+                </div>
+            </div>
+
+            <div class="function-card">
+                <div class="function-name">DIA.DA.SEMANA</div>
+                <div class="function-syntax">=DIA.DA.SEMANA(data;[tipo])</div>
+                <div class="function-description">Retorna o dia da semana correspondente a uma data, como um número entre 1 (domingo) e 7 (sábado) por padrão.</div>
+                <div class="function-example">
+                    =DIA.DA.SEMANA("21/03/2025")<br>
+                    <span class="function-result">→ 6 (sexta-feira)</span>
+                </div>
+            </div>
+
+            <div class="function-card">
+                <div class="function-name">DIATRABALHOTOTAL</div>
+                <div class="function-syntax">=DIATRABALHOTOTAL(data_inicial;data_final;[feriados])</div>
+                <div class="function-description">Calcula o número de dias úteis entre duas datas, excluindo finais de semana e feriados opcionais.</div>
+                <div class="function-example">
+                    =DIATRABALHOTOTAL("01/01/2025";"21/03/2025")<br>
+                    <span class="function-result">→ 57 (aproximado)</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="interactive-demo">
+            <div class="demo-title">Demonstração Interativa: Funções de Data</div>
+            <div class="demo-controls">
+                <input type="date" id="date-input1" class="demo-input" value="2025-03-21">
+                <input type="date" id="date-input2" class="demo-input" value="2025-01-01">
+                <select id="date-function" class="demo-select">
+                    <option value="DIAS">DIAS</option>
+                    <option value="ANO">ANO</option>
+                    <option value="MES">MÊS</option>
+                    <option value="DIA">DIA</option>
+                    <option value="DIA.DA.SEMANA">DIA.DA.SEMANA</option>
+                </select>
+            </div>
+            <div class="formula-builder" id="date-formula-preview">=DIAS("21/03/2025";"01/01/2025")</div>
+            <div class="demo-result" id="date-result">79</div>
+        </div>
+    </section>
+
+    <section class="content-section" id="exercicios">
+        <h2 class="section-title">Exercícios Práticos</h2>
+        <p>Teste seus conhecimentos sobre funções de texto e data com estes exercícios interativos.</p>
+
+        <div class="exercise-section">
+            <div class="exercise-title">Exercício 1: Manipulação de Texto</div>
+            <div class="exercise-description">Crie uma fórmula que extraia o código de produto a partir de um texto. Os códigos sempre começam com "PRD-" seguidos por 6 dígitos.</div>
+            
+            <div class="exercise-container">
+                <div class="exercise-prompt">Dado o texto: "Item: PRD-123456 - Processador Quântico"</div>
+                <input type="text" id="exercise1-input" class="exercise-input" placeholder="Insira sua fórmula aqui...">
+                <button id="exercise1-check" class="exercise-btn">Verificar Resposta</button>
+                <button id="exercise1-hint" class="hint-btn">Dica</button>
+                <div id="exercise1-hint-text" class="hint-text">Você precisará usar LOCALIZAR para encontrar "PRD-" e EXT.TEXTO para extrair os 9 caracteres (incluindo "PRD-").</div>
+                <div id="exercise1-feedback" class="exercise-feedback"></div>
+            </div>
+        </div>
+
+        <div class="exercise-section">
+            <div class="exercise-title">Exercício 2: Cálculo de Dias Úteis</div>
+            <div class="exercise-description">Crie uma fórmula para calcular quantos dias úteis existem entre 01/03/2025 e 22/03/2025 (sem considerar feriados).</div>
+            
+            <div class="exercise-container">
+                <div class="exercise-prompt">Calcule os dias úteis entre 01/03/2025 e 22/03/2025:</div>
+                <input type="text" id="exercise2-input" class="exercise-input" placeholder="Insira sua fórmula aqui...">
+                <button id="exercise2-check" class="exercise-btn">Verificar Resposta</button>
+                <button id="exercise2-hint" class="hint-btn">Dica</button>
+                <div id="exercise2-hint-text" class="hint-text">Use a função DIATRABALHOTOTAL que calcula automaticamente os dias úteis, excluindo finais de semana.</div>
+                <div id="exercise2-feedback" class="exercise-feedback"></div>
+            </div>
+        </div>
+
+        <div class="exercise-section">
+            <div class="exercise-title">Exercício 3: Formatação de Dados Combinados</div>
+            <div class="exercise-description">Crie uma fórmula que combine o nome de um produto, seu preço e data de validade em um formato específico.</div>
+            
+            <div class="exercise-container">
+                <div class="exercise-prompt">Dados: "Visor Holográfico" (célula A1), 1299.90 (célula B1), 15/12/2025 (célula C1)</div>
+                <div class="exercise-prompt">Resultado esperado: "VISOR HOLOGRÁFICO - R$ 1.299,90 (Validade: 15/12/2025)"</div>
+                <input type="text" id="exercise3-input" class="exercise-input" placeholder="Insira sua fórmula aqui...">
+                <button id="exercise3-check" class="exercise-btn">Verificar Resposta</button>
+                <button id="exercise3-hint" class="hint-btn">Dica</button>
+                <div id="exercise3-hint-text" class="hint-text">Combine MAIÚSCULA com CONCATENAR (ou &) e TEXTO para formatar o valor como moeda.</div>
+                <div id="exercise3-feedback" class="exercise-feedback"></div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-logo">Prisma Arena</div>
+            <p>Dominando as funções de texto e data no Excel</p>
+            <p class="copyright">© 2025 Prisma Arena. Todos os direitos reservados.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Criar efeito de estrelas
+        document.addEventListener('DOMContentLoaded', function() {
+            const starsContainer = document.getElementById('stars');
+            const starCount = 100;
+            
+            for (let i = 0; i < starCount; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.animationDelay = `${Math.random() * 5}s`;
+                star.style.width = `${Math.random() * 3 + 1}px`;
+                star.style.height = star.style.width;
+                starsContainer.appendChild(star);
+            }
+
+            // Smooth scroll para os links de navegação
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+
+            // Botão CTA também faz scroll suave
+            document.querySelector('.cta-button').addEventListener('click', function() {
+                document.querySelector('#textos').scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+
+            // Demonstração interativa de funções de texto
+            const textInput = document.getElementById('text-input');
+            const textFunction = document.getElementById('text-function');
+            const param1 = document.getElementById('param1');
+            const param2 = document.getElementById('param2');
+            const formulaPreview = document.getElementById('formula-preview');
+            const textResult = document.getElementById('text-result');
+
+            function updateTextDemo() {
+                const text = textInput.value;
+                const func = textFunction.value;
+                let result = '';
+                let formula = '';
+
+                switch(func) {
+                    case 'MAIUSCULA':
+                        result = text.toUpperCase();
+                        formula = `=MAIÚSCULA("${text}")`;
+                        param1.style.display = 'none';
+                        param2.style.display = 'none';
+                        break;
+                    case 'MINUSCULA':
+                        result = text.toLowerCase();
+                        formula = `=MINÚSCULA("${text}")`;
+                        param1.style.display = 'none';
+                        param2.style.display = 'none';
+                        break;
+                    case 'PRI.MAIUSCULA':
+                        result = text.replace(/\w\S*/g, function(txt) {
+                            return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+                        });
+                        formula = `=PRI.MAIÚSCULA("${text}")`;
+                        param1.style.display = 'none';
+                        param2.style.display = 'none';
+                        break;
+                    case 'ESQUERDA':
+                        const leftChars = parseInt(param1.value) || 1;
+                        result = text.substring(0, leftChars);
+                        formula = `=ESQUERDA("${text}";${leftChars})`;
+                        param1.style.display = 'block';
+                        param1.placeholder = 'Núm. caracteres';
+                        param2.style.display = 'none';
+                        break;
+                    case 'DIREITA':
+                        const rightChars = parseInt(param1.value) || 1;
+                        result = text.substring(text.length - rightChars);
+                        formula = `=DIREITA("${text}";${rightChars})`;
+                        param1.style.display = 'block';
+                        param1.placeholder = 'Núm. caracteres';
+                        param2.style.display = 'none';
+                        break;
+                    case 'EXT.TEXTO':
+                        const startPos = parseInt(param1.value) || 1;
+                        const numChars = parseInt(param2.value) || 1;
+                        result = text.substring(startPos - 1, startPos - 1 + numChars);
+                        formula = `=EXT.TEXTO("${text}";${startPos};${numChars})`;
+                        param1.style.display = 'block';
+                        param1.placeholder = 'Posição inicial';
+                        param2.style.display = 'block';
+                        param2.placeholder = 'Núm. caracteres';
+                        break;
+                }
+
+                formulaPreview.textContent = formula;
+                textResult.textContent = result;
+            }
+
+            textInput.addEventListener('input', updateTextDemo);
+            textFunction.addEventListener('change', updateTextDemo);
+            param1.addEventListener('input', updateTextDemo);
+            param2.addEventListener('input', updateTextDemo);
+
+            // Demonstração interativa de funções de data
+            const dateInput1 = document.getElementById('date-input1');
+            const dateInput2 = document.getElementById('date-input2');
+            const dateFunction = document.getElementById('date-function');
+            const dateFormulaPreview = document.getElementById('date-formula-preview');
+            const dateResult = document.getElementById('date-result');
+
+            function formatDateForFormula(dateStr) {
+                const date = new Date(dateStr);
+                return `${date.getDate().toString().padStart(2, '0')}/${(date.getMonth() + 1).toString().padStart(2, '0')}/${date.getFullYear()}`;
+            }
+
+            function updateDateDemo() {
+                const date1 = new Date(dateInput1.value);
+                const date2 = new Date(dateInput2.value);
+                const func = dateFunction.value;
+                let result = '';
+                let formula = '';
+
+                const formattedDate1 = formatDateForFormula(dateInput1.value);
+                const formattedDate2 = formatDateForFormula(dateInput2.value);
+
+                switch(func) {
+                    case 'DIAS':
+                        const diffTime = Math.abs(date1 - date2);
+                        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                        result = diffDays.toString();
+                        formula = `=DIAS("${formattedDate1}";"${formattedDate2}")`;
+                        break;
+                    case 'ANO':
+                        result = date1.getFullYear().toString();
+                        formula = `=ANO("${formattedDate1}")`;
+                        break;
+                    case 'MES':
+                        result = (date1.getMonth() + 1).toString();
+                        formula = `=MÊS("${formattedDate1}")`;
+                        break;
+                    case 'DIA':
+                        result = date1.getDate().toString();
+                        formula = `=DIA("${formattedDate1}")`;
+                        break;
+                    case 'DIA.DA.SEMANA':
+                        // No Excel, 1 é domingo e 7 é sábado por padrão
+                        const dayOfWeek = date1.getDay() + 1;
+                        result = dayOfWeek.toString();
+                        formula = `=DIA.DA.SEMANA("${formattedDate1}")`;
+                        break;
+                }
+
+                dateFormulaPreview.textContent = formula;
+                dateResult.textContent = result;
+            }
+
+            dateInput1.addEventListener('change', updateDateDemo);
+            dateInput2.addEventListener('change', updateDateDemo);
+            dateFunction.addEventListener('change', updateDateDemo);
+
+            // Atualiza as demos ao carregar a página
+            updateTextDemo();
+            updateDateDemo();
+
+            // Exercícios
+            // Exercício 1
+            document.getElementById('exercise1-hint').addEventListener('click', function() {
+                document.getElementById('exercise1-hint-text').style.display = 'block';
+            });
+
+            document.getElementById('exercise1-check').addEventListener('click', function() {
+                const input = document.getElementById('exercise1-input').value.trim().toUpperCase();
+                const feedback = document.getElementById('exercise1-feedback');
+                
+                // Várias soluções possíveis
+                const correctAnswers = [
+                    '=EXT.TEXTO("ITEM: PRD-123456 - PROCESSADOR QUÂNTICO";7;9)',
+                    '=DIREITA(ESQUERDA("ITEM: PRD-123456 - PROCESSADOR QUÂNTICO";16);9)',
+                    '=EXT.TEXTO("ITEM: PRD-123456 - PROCESSADOR QUÂNTICO";LOCALIZAR("PRD";"ITEM: PRD-123456 - PROCESSADOR QUÂNTICO");9)'
+                ];
+                
+                let isCorrect = false;
+                for (let answer of correctAnswers) {
+                    if (input.includes('PRD-123456') || input.includes('EXT.TEXTO') && input.includes('7') && input.includes('9') || 
+                        input.includes('LOCALIZAR') && input.includes('PRD') || 
+                        (input.includes('ESQUERDA') && input.includes('DIREITA'))) {
+                        isCorrect = true;
+                        break;
+                    }
+                }
+                
+                if (isCorrect) {
+                    feedback.textContent = 'Correto! Sua fórmula extrairá "PRD-123456" do texto.';
+                    feedback.className = 'exercise-feedback feedback-correct';
+                } else {
+                    feedback.textContent = 'Tente novamente. Você precisa extrair "PRD-123456" do texto fornecido.';
+                    feedback.className = 'exercise-feedback feedback-incorrect';
+                }
+                
+                feedback.style.display = 'block';
+            });
+
+            // Exercício 2
+            document.getElementById('exercise2-hint').addEventListener('click', function() {
+                document.getElementById('exercise2-hint-text').style.display = 'block';
+            });
+
+            document.getElementById('exercise2-check').addEventListener('click', function() {
+                const input = document.getElementById('exercise2-input').value.trim().toUpperCase();
+                const feedback = document.getElementById('exercise2-feedback');
+                
+                if (input.includes('DIATRABALHOTOTAL') && input.includes('01/03/2025') && input.includes('22/03/2025')) {
+                    feedback.textContent = 'Correto! A fórmula =DIATRABALHOTOTAL("01/03/2025";"22/03/2025") retornará 15 dias úteis.';
+                    feedback.className = 'exercise-feedback feedback-correct';
+                } else {
+                    feedback.textContent = 'Tente novamente. Use a função DIATRABALHOTOTAL com as datas corretas.';
+                    feedback.className = 'exercise-feedback feedback-incorrect';
+                }
+                
+                feedback.style.display = 'block';
+            });
+
+            // Exercício 3
+            document.getElementById('exercise3-hint').addEventListener('click', function() {
+                document.getElementById('exercise3-hint-text').style.display = 'block';
+            });
+
+            document.getElementById('exercise3-check').addEventListener('click', function() {
+                const input = document.getElementById('exercise3-input').value.trim().toUpperCase();
+                const feedback = document.getElementById('exercise3-feedback');
+                
+                if ((input.includes('MAIUSCULA') || input.includes('MAIÚSCULA')) && 
+                    (input.includes('CONCATENAR') || input.includes('&')) && 
+                    input.includes('TEXTO') && 
+                    input.includes('R$') && 
+                    input.includes('VALIDADE')) {
+                    feedback.textContent = 'Correto! Você combinou as funções adequadamente para formatar o texto conforme solicitado.';
+                    feedback.className = 'exercise-feedback feedback-correct';
+                } else {
+                    feedback.textContent = 'Tente novamente. Combine MAIÚSCULA, CONCATENAR (ou &) e TEXTO para formatar conforme solicitado.';
+                    feedback.className = 'exercise-feedback feedback-incorrect';
+                }
+                
+                feedback.style.display = 'block';
+            });
+        });
+    </script>
+</body>
+</html>
